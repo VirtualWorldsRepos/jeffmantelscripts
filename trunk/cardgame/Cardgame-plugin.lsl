@@ -1,7 +1,10 @@
 ﻿// Card game plugin for Opencollar
+// $ URL $
+// $ Date $
+// $ Revision $
 
-// Version 3.321
 
+// Based on:
 // Template for creating a OpenCollar Plugin - OpenCollar Version 3.4+
 // Inworld version for SVN storage
 // Version: 3.339

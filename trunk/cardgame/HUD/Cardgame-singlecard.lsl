@@ -1,3 +1,8 @@
+// Card game plugin for Opencollar: HUD card
+// $ URL $
+// $ Date $
+// $ Revision $
+
 // script to put in a single card
 
 integer CARD_SIDE=4;
