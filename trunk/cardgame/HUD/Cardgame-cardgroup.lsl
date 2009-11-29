@@ -1,7 +1,7 @@
 // Card game plugin for Opencollar: HUD root
-// $ URL $
-// $ Date $
-// $ Revision $
+// $URL$
+// $Date$
+// $Revision$
 
 // put this script in the root prim covering the cards
 
