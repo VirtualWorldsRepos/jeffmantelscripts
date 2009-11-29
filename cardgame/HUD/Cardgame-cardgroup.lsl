@@ -1,3 +1,8 @@
+// Card game plugin for Opencollar: HUD root
+// $ URL $
+// $ Date $
+// $ Revision $
+
 // put this script in the root prim covering the cards
 
 integer CARD_CHANNEL_OFFSET=1875;
