@@ -1,7 +1,7 @@
 ﻿// Card game plugin for Opencollar
-// $ URL $
-// $ Date $
-// $ Revision $
+// $URL$
+// $Date$
+// $Revision$
 
 
 // Based on:
