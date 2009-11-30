@@ -11,7 +11,7 @@
 // Date: 2009/10/16
 // Last edited by: Cleo Collins
 
-//Licensed under the GPLv2, with the additional requirement that these scripts remain "full perms" in Second Life.  See "OpenCollar License" for details.
+//Licensed under the GPLv2, with the additional requirement that these scripts remain "full perms" in Second Life.	See "OpenCollar License" for details.
 
 string g_szSubmenu = "CardGame"; // Name of the submenu
 string g_szParentmenu = "AddOns"; // name of the menu, where the menu plugs in, should be usually Addons. Please do not use the mainmenu anymore
@@ -138,7 +138,7 @@ integer COMMAND_BLACKLIST = 520;
 integer COMMAND_WEARERLOCKEDOUT = 521;
 
 
-//integer SEND_IM = 1000; deprecated.  each script should send its own IMs now.  This is to reduce even the tiny bt of lag caused by having IM slave scripts
+//integer SEND_IM = 1000; deprecated.  each script should send its own IMs now.	 This is to reduce even the tiny bt of lag caused by having IM slave scripts
 integer POPUP_HELP = 1001;
 
 // messages for storing and retrieving values from http db
@@ -188,151 +188,151 @@ integer CPLANIM_STOP = 7005;//str should be valid anim name.  id should be av
 string UPMENU = "^";//when your menu hears this, give the parent menu
 
 //===============================================================================
-//= parameters   :    string    szMsg   message string received
+//= parameters	 :	  string	szMsg	message string received
 //=
-//= return        :    none
+//= return		  :	   none
 //=
-//= description  :    output debug messages
+//= description	 :	  output debug messages
 //=
 //===============================================================================
 
 Debug(string szMsg)
 {
-    if (!g_nDebugMode) return;
-    llOwnerSay(llGetScriptName() + ": " + szMsg);
+	if (!g_nDebugMode) return;
+	llOwnerSay(llGetScriptName() + ": " + szMsg);
 }
 
 //===============================================================================
-//= parameters   :    to complete
+//= parameters	 :	  to complete
 //=
-//= return        :    none
+//= return		  :	   none
 //=
-//= description  :    notify targeted id and maybe the wearer
+//= description	 :	  notify targeted id and maybe the wearer
 //=
 //===============================================================================
 
 Notify(key id, string msg, integer alsoNotifyWearer)
 {
-    if (id == g_keyWearer)
-    {
-        llOwnerSay(msg);
-    }
-    else
-    {
-        llInstantMessage(id,msg);
-        if (alsoNotifyWearer)
-        {
-            llOwnerSay(msg);
-        }
-    }
+	if (id == g_keyWearer)
+	{
+		llOwnerSay(msg);
+	}
+	else
+	{
+		llInstantMessage(id,msg);
+		if (alsoNotifyWearer)
+		{
+			llOwnerSay(msg);
+		}
+	}
 }
 
 //===============================================================================
-//= parameters   :    none
+//= parameters	 :	  none
 //=
-//= return        :    key random uuid
+//= return		  :	   key random uuid
 //=
-//= description  :    random key generator, not complety unique, but enough for use in dialogs
+//= description	 :	  random key generator, not complety unique, but enough for use in dialogs
 //=
 //===============================================================================
-
 
 key ShortKey()
 {//just pick 8 random hex digits and pad the rest with 0.  Good enough for dialog uniqueness.
-    string chars = "0123456789abcdef";
-    integer length = 16;
-    string out;
-    integer n;
-    for (n = 0; n < 8; n++)
-    {
-        integer index = (integer)llFrand(16);//yes this is correct; an integer cast rounds towards 0.  See the llFrand wiki entry.
-        out += llGetSubString(chars, index, index);
-    }
+	string chars = "0123456789abcdef";
+	integer length = 16;
+	string out;
+	integer n;
+	for (n = 0; n < 8; n++)
+	{
+		integer index = (integer)llFrand(16);//yes this is correct; an integer cast rounds towards 0.  See the llFrand wiki entry.
+		out += llGetSubString(chars, index, index);
+	}
 
-    return (key)(out + "-0000-0000-0000-000000000000");
+	return (key)(out + "-0000-0000-0000-000000000000");
 }
 
-//===============================================================================
-//= parameters   :    key   rcpt  recipient of the dialog
-//=                   string  prompt    dialog prompt
-//=                   list  choices    true dialog buttons
-//=                   list  utilitybuttons  utility buttons (kept on every page)
-//=                   integer   page    page to display
-//=
-//= return        :    key  handler of the dialog
-//=
-//= description  :    displays a dialog to the given recipient
-//=
-//===============================================================================
 
+//===============================================================================
+//= parameters	 :	  key	rcpt  recipient of the dialog
+//=					  string  prompt	dialog prompt
+//=					  list	choices	   true dialog buttons
+//=					  list	utilitybuttons	utility buttons (kept on every page)
+//=					  integer	page	page to display
+//=
+//= return		  :	   key	handler of the dialog
+//=
+//= description	 :	  displays a dialog to the given recipient
+//=
+//===============================================================================
 
 key Dialog(key rcpt, string prompt, list choices, list utilitybuttons, integer page)
 {
-    key id = ShortKey();
-    llMessageLinked(LINK_SET, DIALOG, (string)rcpt + "|" + prompt + "|" + (string)page + "|" + llDumpList2String(choices, "`") + "|" + llDumpList2String(utilitybuttons, "`"), id);
-    return id;
+	key id = ShortKey();
+	llMessageLinked(LINK_SET, DIALOG, (string)rcpt + "|" + prompt + "|" + (string)page + "|" + llDumpList2String(choices, "`") + "|" + llDumpList2String(utilitybuttons, "`"), id);
+	return id;
 }
 
 
 //===============================================================================
-//= parameters   :    key owner            key of the person to send the message to
-//=                    integer nOffset        Offset to make sure we use really a unique channel
+//= parameters	 :	  key owner			   key of the person to send the message to
+//=					   integer nOffset		  Offset to make sure we use really a unique channel
 //=
-//= description  : Function which calculates a unique channel number based on the owner key, to reduce lag
+//= description	 : Function which calculates a unique channel number based on the owner key, to reduce lag
 //=
-//= returns      : Channel number to be used
+//= returns		 : Channel number to be used
 //===============================================================================
+
 integer nGetOwnerChannel(key owner, integer nOffset)
 {
-    integer chan = (integer)("0x"+llGetSubString((string)owner,2,7)) + nOffset;
-    if (chan>0)
-    {
-        chan=chan*(-1);
-    }
-    if (chan > -10000)
-    {
-        chan -= 30000;
-    }
-    return chan;
+	integer chan = (integer)("0x"+llGetSubString((string)owner,2,7)) + nOffset;
+	if (chan>0)
+	{
+		chan=chan*(-1);
+	}
+	if (chan > -10000)
+	{
+		chan -= 30000;
+	}
+	return chan;
 }
 
 
 //===============================================================================
-//= parameters   :    string    szMsg   message string received
+//= parameters	 :	  string	szMsg	message string received
 //=
-//= return        :    integer TRUE/FALSE
+//= return		  :	   integer TRUE/FALSE
 //=
-//= description  :    checks if a string begin with another string
+//= description	 :	  checks if a string begin with another string
 //=
 //===============================================================================
 
 integer nStartsWith(string szHaystack, string szNeedle) // http://wiki.secondlife.com/wiki/llSubStringIndex
 {
-    return (llDeleteSubString(szHaystack, llStringLength(szNeedle), -1) == szNeedle);
+	return (llDeleteSubString(szHaystack, llStringLength(szNeedle), -1) == szNeedle);
 }
 
 //===============================================================================
-//= parameters   :    string    keyID   key of person requesting the menu
+//= parameters	 :	  string	keyID	key of person requesting the menu
 //=
-//= return        :    none
+//= return		  :	   none
 //=
-//= description  :    build menu and display to user
+//= description	 :	  build menu and display to user
 //=
 //===============================================================================
 
 DoMenu(key keyID)
 {
-    string prompt;
-    list mybuttons;
-    
-    if (g_GameState == STATE_DISABLED)
-    {
-        prompt = "Game is disabled. Only an owner can enable it. Please pick an option:\n";
-        prompt += g_LabelEnablePrimary + " will enable the game with either primary or secondary ownership.\n";
-        prompt += g_LabelEnableSecondary + " will enable the game, restricted to secondary ownership.\n";
-        
-        g_lstLocalbuttons = g_DisabledMenuButtons;
-    }
+	string prompt;
+	list mybuttons;
+	
+	if (g_GameState == STATE_DISABLED)
+	{
+		prompt = "Game is disabled. Only an owner can enable it. Please pick an option:\n";
+		prompt += g_LabelEnablePrimary + " will enable the game with either primary or secondary ownership.\n";
+		prompt += g_LabelEnableSecondary + " will enable the game, restricted to secondary ownership.\n";
+		
+		g_lstLocalbuttons = g_DisabledMenuButtons;
+	}
 	else if (keyID != g_keyWearer)
 	{
 		if (g_GameState < STATE_FIRSTDRAW)
@@ -347,132 +347,151 @@ DoMenu(key keyID)
 		
 		g_lstLocalbuttons = g_EnableMenuOthersButtons;
 	}
-    else if (g_GameState == STATE_OFF)
-    {
-        prompt = "No current game. Please pick an option.\n";
-        g_lstLocalbuttons = g_OffMenuButtons;
-    }
-    else if (g_GameState == STATE_DETECT)
-    {
-        prompt = "Please pick a partner";
-        g_lstLocalbuttons = g_ScanMenuButtons;
-    }
-    else if (g_GameState == STATE_ASKED)
-    {
-        prompt = g_PartnerName + " would like to play a card game with you.\n";
-        prompt += "Type of ownership: ";
-        if (g_GamePrimary)
-        {
-            prompt += "primary";
-        }
-        else
-        {
-            prompt += "secondary";
-        }
-        prompt += "\nDelay: ";
-        
-        integer minutes = g_GameTime;
-        integer hours = 0;
-        
-        while (minutes >= 60)
-        {
-            hours += 1;
-            minutes -= 60;
-        }
-        if (hours > 0)
-        {
-            prompt += (string)hours + " h";
-        }
-        if (minutes  > 0)
-        {
-            prompt += (string)minutes + " minutes";
-        }
-        prompt += "\nDo you accept?";
-        g_lstLocalbuttons = ["Yes","No"];
-    }
-    else if (g_GameState == STATE_OWNER)
-    {
-        prompt = "You are currently owner of " + g_PartnerName;
-        g_lstLocalbuttons = g_OwnerMenu;
-    }
-    else if (g_GameState == STATE_OWNERLOOSING)
-    {
-        prompt = g_PartnerName + " doesn't know yet that you lost";
-        g_lstLocalbuttons = g_OwnerLostMenu;
+	else if (g_GameState == STATE_OFF)
+	{
+		prompt = "No current game. Please pick an option.\n";
+		g_lstLocalbuttons = g_OffMenuButtons;
+	}
+	else if (g_GameState == STATE_DETECT)
+	{
+		prompt = "Please pick a partner";
+		g_lstLocalbuttons = g_ScanMenuButtons;
+	}
+	else if (g_GameState == STATE_ASKED)
+	{
+		prompt = g_PartnerName + " would like to play a card game with you.\n";
+		prompt += "Type of ownership: ";
+		if (g_GamePrimary)
+		{
+			prompt += "primary";
+		}
+		else
+		{
+			prompt += "secondary";
+		}
+		prompt += "\nDelay: ";
+		
+		integer minutes = g_GameTime;
+		integer hours = 0;
+		
+		while (minutes >= 60)
+		{
+			hours += 1;
+			minutes -= 60;
+		}
+		if (hours > 0)
+		{
+			prompt += (string)hours + " h";
+		}
+		if (minutes	 > 0)
+		{
+			prompt += (string)minutes + " minutes";
+		}
+		prompt += "\nDo you accept?";
+		g_lstLocalbuttons = ["Yes","No"];
+	}
+	else if (g_GameState == STATE_OWNER)
+	{
+		prompt = "You are currently owner of " + g_PartnerName;
+		g_lstLocalbuttons = g_OwnerMenu;
+	}
+	else if (g_GameState == STATE_OWNERLOOSING)
+	{
+		prompt = g_PartnerName + " doesn't know yet that you lost";
+		g_lstLocalbuttons = g_OwnerLostMenu;
 
-        if (llGetTime() > g_GameTime * 60.0)
-        {
-            g_lstLocalbuttons += [g_LabelDraw];
-        }
-    }
-    else if ((g_GameState == STATE_SLAVE) || (g_GameState == STATE_FREESLAVE))
-    {
-        prompt = "You are currently owned by " + g_PartnerName;
-        g_lstLocalbuttons = g_SlaveMenu;
-        
-        if (llGetTime() > g_GameTime * 60.0)
-        {
-            g_lstLocalbuttons += [g_LabelDraw];
-        }
-    }        
-    else
-    {
-        prompt = "Waiting for an answer from " + g_PartnerName;
-        g_lstLocalbuttons = [g_LabelCancel];
-    }
-    mybuttons = g_lstLocalbuttons + g_lstButtons;
+		if (llGetTime() > g_GameTime * 60.0)
+		{
+			g_lstLocalbuttons += [g_LabelDraw];
+		}
+	}
+	else if ((g_GameState == STATE_SLAVE) || (g_GameState == STATE_FREESLAVE))
+	{
+		prompt = "You are currently owned by " + g_PartnerName;
+		g_lstLocalbuttons = g_SlaveMenu;
+		
+		if (llGetTime() > g_GameTime * 60.0)
+		{
+			g_lstLocalbuttons += [g_LabelDraw];
+		}
+	}		 
+	else
+	{
+		prompt = "Waiting for an answer from " + g_PartnerName;
+		g_lstLocalbuttons = [g_LabelCancel];
+	}
+	mybuttons = g_lstLocalbuttons + g_lstButtons;
 
-    //fill in your button list and additional prompt here
-    llListSort(mybuttons, 1, TRUE); // resort menu buttons alphabetical
+	//fill in your button list and additional prompt here
+	llListSort(mybuttons, 1, TRUE); // resort menu buttons alphabetical
 
-    // and dispay the menu
-    g_keyMenuID = Dialog(keyID, prompt, mybuttons, [UPMENU], 0);
+	// and dispay the menu
+	g_keyMenuID = Dialog(keyID, prompt, mybuttons, [UPMENU], 0);
 }
+
+//===============================================================================
+//= parameters	 :	  string	keyID	key of person requesting the menu
+//=
+//= return		  :	   none
+//=
+//= description	 :	  build settings menu and display to user
+//=
+//===============================================================================
 
 DoSettingsMenu(key keyID)
 {
-    string prompt;
-    integer hours;
-    integer minutes;
+	string prompt;
+	integer hours;
+	integer minutes;
 
-    // create prompt
-    prompt = "Card game settings. Current setup:\nType of ownership:";
-    if (g_SettingPrimary)
-    {
-        prompt = prompt + "primary";
-    }
-    else
-    {
-        prompt = prompt + "secondary";
-    }
-    prompt = prompt + "\nDelay between draws: ";
-    if (g_SettingTime < 60)
-    {
-        prompt = prompt + (string)g_SettingTime + "min";
-    }
-    else
-    {
-        minutes = g_SettingTime;
-        hours = 0;
-        while (minutes >= 60)
-        {
-            hours=hours+1;
-            minutes=minutes-60;
-        }
-        prompt = prompt + (string)hours + " h";
-        if (minutes > 0)
-        {
-            prompt = prompt + " " + (string)minutes;
-        }
-    }
-    prompt = prompt + "\n";
-    
-    //fill in your button list and additional prompt here
-    llListSort(g_lstLocalbuttons, 1, TRUE); // resort menu buttons alphabetical
+	// create prompt
+	prompt = "Card game settings. Current setup:\nType of ownership:";
+	if (g_SettingPrimary)
+	{
+		prompt = prompt + "primary";
+	}
+	else
+	{
+		prompt = prompt + "secondary";
+	}
+	prompt = prompt + "\nDelay between draws: ";
+	if (g_SettingTime < 60)
+	{
+		prompt = prompt + (string)g_SettingTime + "min";
+	}
+	else
+	{
+		minutes = g_SettingTime;
+		hours = 0;
+		while (minutes >= 60)
+		{
+			hours=hours+1;
+			minutes=minutes-60;
+		}
+		prompt = prompt + (string)hours + " h";
+		if (minutes > 0)
+		{
+			prompt = prompt + " " + (string)minutes;
+		}
+	}
+	prompt = prompt + "\n";
+	
+	//fill in your button list and additional prompt here
+	llListSort(g_lstLocalbuttons, 1, TRUE); // resort menu buttons alphabetical
 
-    // and dispay the menu
-    g_SettingsMenuKey = Dialog(keyID, prompt, g_SettingsMenuButtons, [UPMENU], 0);
+	// and dispay the menu
+	g_SettingsMenuKey = Dialog(keyID, prompt, g_SettingsMenuButtons, [UPMENU], 0);
 }
+
+//===============================================================================
+//= parameters :		integer	isOwner		TRUE if wearer becomes the owner of the partner
+//= 					integer	first		TRUE if it is the first time that we set ownerships in the game
+//=
+//= return :			none
+//=
+//= description	 :		change ownerships when the roles are set or exchanged
+//=
+//===============================================================================
 
 SetOwnership(integer isOwner, integer first)
 {
@@ -564,6 +583,16 @@ SetOwnership(integer isOwner, integer first)
 	}
 }
 
+
+//===============================================================================
+//= parameters :		integer	wasOwner	TRUE if wearer was owner of the partner before the game ended
+//=
+//= return :			none
+//=
+//= description	 :		restore the original ownership settings at the end of a game
+//=
+//===============================================================================
+
 ResetOwnership(integer wasOwner)
 {
 	if (wasOwner)
@@ -644,6 +673,17 @@ ResetOwnership(integer wasOwner)
 	}
 }
 
+
+//===============================================================================
+//= parameters :		string		name		Name of the avatar to add
+//=						integer		primary		TRUE if avatar should be made a primary owner
+//=
+//= return :			none
+//=
+//= description	 :		add an avatar to the primary or secondary owner list
+//=
+//===============================================================================
+
 AddOwner(string name, integer primary)
 {
 	string message;
@@ -661,6 +701,16 @@ AddOwner(string name, integer primary)
 	llOwnerSay("added " + name);
 	
 }
+
+//===============================================================================
+//= parameters :		string		name		Name of the avatar to remove
+//=						integer		primary		TRUE if avatar was a primary owner
+//=
+//= return :			none
+//=
+//= description	 :		remove an avatar from the primary or secondary owner list
+//=
+//===============================================================================
 
 RemoveOwner(string name, integer primary)
 {
@@ -680,61 +730,101 @@ RemoveOwner(string name, integer primary)
 }
 
 //===============================================================================
-//= parameters   :    none
+//= parameters	 :	  none
 //=
-//= return        :   string     DB prefix from the description of the collar
+//= return		  :	  string	 DB prefix from the description of the collar
 //=
-//= description  :    prefix from the description of the collar
+//= description	 :	  prefix from the description of the collar
 //=
 //===============================================================================
 
 string GetDBPrefix()
 {//get db prefix from list in object desc
-    return llList2String(llParseString2List(llGetObjectDesc(), ["~"], []), 2);
+	return llList2String(llParseString2List(llGetObjectDesc(), ["~"], []), 2);
 }
+
+//===============================================================================
+//= parameters	 :	  none
+//=
+//= return		  :	  none
+//=
+//= description	 :	  Reset the card numbers and HUD
+//=
+//===============================================================================
 
 ClearCards()
 {
-    g_MyCard = -1;
-    g_MyColor = -1;
-    g_OtherCard = -1;
-    g_OtherColor = -1;
-    
-    llSay(nGetOwnerChannel(g_keyWearer,CARD_CHANNEL_OFFSET),g_MessagesID+"|"+g_LabelResetCards);
+	g_MyCard = -1;
+	g_MyColor = -1;
+	g_OtherCard = -1;
+	g_OtherColor = -1;
+	
+	llSay(nGetOwnerChannel(g_keyWearer,CARD_CHANNEL_OFFSET),g_MessagesID+"|"+g_LabelResetCards);
 }
+
+//===============================================================================
+//= parameters :	integer		myCard		TRUE if it is the wearer's card that must be shown
+//=					integer		color		Card color number (1-4)
+//=					integer		value		Card value (1-13)
+//=
+//= return :		none
+//=
+//= description	 :	Shows a card on the HUD
+//=
+//===============================================================================
 
 ShowCard(integer myCard, integer color, integer value)
 {
-    string message = g_MessagesID+"|"+g_LabelShowCard+"|";
-    
-    if (myCard != FALSE)
-    {
-        message += g_LabelMyCard;
-    }
-    else
-    {
-        message += g_LabelOtherCard;
-    }
-    message += "|"+(string)color+"|"+(string)value;
-    
-    llSay(nGetOwnerChannel(g_keyWearer,CARD_CHANNEL_OFFSET),message);
+	string message = g_MessagesID+"|"+g_LabelShowCard+"|";
+	
+	if (myCard != FALSE)
+	{
+		message += g_LabelMyCard;
+	}
+	else
+	{
+		message += g_LabelOtherCard;
+	}
+	message += "|"+(string)color+"|"+(string)value;
+	
+	llSay(nGetOwnerChannel(g_keyWearer,CARD_CHANNEL_OFFSET),message);
 }
+
+
+//===============================================================================
+//= parameters :	none
+//=
+//= return :		none
+//=
+//= description	 :	Clears the card and ask the wearer to pick one
+//=
+//===============================================================================
 
 AskForDraw()
 {
-    llOwnerSay("Click on one of the cards to draw");
-    ClearCards();
+	llOwnerSay("Click on one of the cards to draw");
+	ClearCards();
 }
+
+
+//===============================================================================
+//= parameters :	none
+//=
+//= return :		none
+//=
+//= description	 :	Stops the game, and tell the partner to do the same
+//=
+//===============================================================================
 
 ProcessCancelRequest()
 {
-    llOwnerSay("Cancelling game");
-    
-    if (g_PartnerChannel!= 0)
-    {
-        llSay(g_PartnerChannel,g_MessagesID+"|" + g_LabelCancel);
-    }
-    
+	llOwnerSay("Cancelling game");
+	
+	if (g_PartnerChannel!= 0)
+	{
+		llSay(g_PartnerChannel,g_MessagesID+"|" + g_LabelCancel);
+	}
+	
 	if ((g_GameState == STATE_OWNER) || (g_GameState == STATE_OWNERLOOSING))
 	{
 		ResetOwnership(TRUE);
@@ -744,474 +834,509 @@ ProcessCancelRequest()
 		ResetOwnership(FALSE);
 	}
 	
-    g_GameState = STATE_OFF;
-    g_PartnerKey = NULL_KEY;
-    g_PartnerChannel = 0;
+	g_GameState = STATE_OFF;
+	g_PartnerKey = NULL_KEY;
+	g_PartnerChannel = 0;
 	ClearCards();
 }
 
+//===============================================================================
+//= parameters :	none
+//=
+//= return :		none
+//=
+//= description	 :	Pick a new card
+//=
+//===============================================================================
+
 CardDraw()
 {
-    if (g_MyCard == -1)
-    {
-        g_MyCard = ((integer)llFrand(12.0))+1;
-        g_MyColor = ((integer)llFrand(4.0))+1;
-        llSay(g_PartnerChannel,g_MessagesID + "|" + g_LabelCard + "|" +
-            (string)g_MyCard+"|"+(string)g_MyColor);
-        ShowCard(TRUE,g_MyColor,g_MyCard);
-        ProcessCard();
-    }
+	if (g_MyCard == -1)
+	{
+		g_MyCard = ((integer)llFrand(12.0))+1;
+		g_MyColor = ((integer)llFrand(4.0))+1;
+		llSay(g_PartnerChannel,g_MessagesID + "|" + g_LabelCard + "|" +
+			(string)g_MyCard+"|"+(string)g_MyColor);
+		ShowCard(TRUE,g_MyColor,g_MyCard);
+		ProcessCard();
+	}
 }
+
+//===============================================================================
+//= parameters :	none
+//=
+//= return :		none
+//=
+//= description	 :	Check if both have drawn cards, and decide what to do
+//=
+//===============================================================================
 
 ProcessCard()
 {
-    // display the card of the other player in some cases
-    if ((g_OtherCard != -1) && ((g_GameState == STATE_FIRSTDRAW) || (g_GameState == STATE_OWNER) ||
-        (g_GameState == STATE_OWNERLOOSING)))
-    {
-        ShowCard(FALSE,g_OtherColor,g_OtherCard);
-    }
-    
-    // only continue if both cards have been drawn
-    if ((g_MyCard == -1) || (g_OtherCard == -1))
-    {
-        return;
-    }
-    
-    llResetTime();
-    
-    if (g_GameState == STATE_FIRSTDRAW)
-    {
-        if (g_MyCard > g_OtherCard)
-        {
-            llOwnerSay("You are now owner!");
-            g_GameState = STATE_OWNER;
+	// display the card of the other player in some cases
+	if ((g_OtherCard != -1) && ((g_GameState == STATE_FIRSTDRAW) || (g_GameState == STATE_OWNER) ||
+		(g_GameState == STATE_OWNERLOOSING)))
+	{
+		ShowCard(FALSE,g_OtherColor,g_OtherCard);
+	}
+	
+	// only continue if both cards have been drawn
+	if ((g_MyCard == -1) || (g_OtherCard == -1))
+	{
+		return;
+	}
+	
+	llResetTime();
+	
+	if (g_GameState == STATE_FIRSTDRAW)
+	{
+		if (g_MyCard > g_OtherCard)
+		{
+			llOwnerSay("You are now owner!");
+			g_GameState = STATE_OWNER;
 			SetOwnership(TRUE,TRUE);
-        }
-        else if (g_MyCard < g_OtherCard)
-        {
-            llOwnerSay("You are now slave!");
-            g_GameState = STATE_SLAVE;
+		}
+		else if (g_MyCard < g_OtherCard)
+		{
+			llOwnerSay("You are now slave!");
+			g_GameState = STATE_SLAVE;
 			SetOwnership(FALSE,TRUE);
-        }
-        else
-        {
-            llOwnerSay("Need to draw again!");
+		}
+		else
+		{
+			llOwnerSay("Need to draw again!");
 			llSleep(5);
-            AskForDraw();
-        }
-    }
-    else if ((g_GameState == STATE_OWNER) || (g_GameState == STATE_OWNERLOOSING))
-    {
-        if (g_MyCard < g_OtherCard)
-        {
-            llOwnerSay("You lost! " +g_PartnerName + " can escape!");
-            g_GameState = STATE_OWNERLOOSING;
-        }
-        else
-        {
-            llOwnerSay("You remain owner");
-        }
-    }
-    else if ((g_GameState == STATE_SLAVE) || (g_GameState == STATE_FREESLAVE))
-    {
-        if (g_MyCard > g_OtherCard)
-        {
-            g_GameState = STATE_FREESLAVE;
-        }
-    }
+			AskForDraw();
+		}
+	}
+	else if ((g_GameState == STATE_OWNER) || (g_GameState == STATE_OWNERLOOSING))
+	{
+		if (g_MyCard < g_OtherCard)
+		{
+			llOwnerSay("You lost! " +g_PartnerName + " can escape!");
+			g_GameState = STATE_OWNERLOOSING;
+		}
+		else
+		{
+			llOwnerSay("You remain owner");
+		}
+	}
+	else if ((g_GameState == STATE_SLAVE) || (g_GameState == STATE_FREESLAVE))
+	{
+		if (g_MyCard > g_OtherCard)
+		{
+			g_GameState = STATE_FREESLAVE;
+		}
+	}
 }
 
 default
 {
-    state_entry()
-    {
-        if (g_keyWearer == NULL_KEY)
-        {
-            g_keyWearer=llGetOwner();
-        }
-        
-        // sleep a sceond to allow all scripts to be initialized
-        llSleep(1.0);
-        // send reequest to main menu and ask other menus if the wnt to register with us
-        llMessageLinked(LINK_THIS, MENUNAME_REQUEST, g_szSubmenu, NULL_KEY);
-        llMessageLinked(LINK_THIS, MENUNAME_RESPONSE, g_szParentmenu + "|" + g_szSubmenu, NULL_KEY);
-    }
+	state_entry()
+	{
+		if (g_keyWearer == NULL_KEY)
+		{
+			g_keyWearer=llGetOwner();
+		}
+		
+		// sleep a sceond to allow all scripts to be initialized
+		llSleep(1.0);
+		// send reequest to main menu and ask other menus if the wnt to register with us
+		llMessageLinked(LINK_THIS, MENUNAME_REQUEST, g_szSubmenu, NULL_KEY);
+		llMessageLinked(LINK_THIS, MENUNAME_RESPONSE, g_szParentmenu + "|" + g_szSubmenu, NULL_KEY);
+		
+		// reset cards
+		ClearCards();
+	}
 
-    // reset the script on rezzing, data should be received than from httpdb.
-    // by only reseting on owner change we store our most values internal and
-    // they do not get lost, if the httpdb for the wearer is "full"
-    on_rez(integer param)
-    {
-        if (llGetOwner()!=g_keyWearer)
-        {
-            // Reset if wearer changed
-            llResetScript();
-        }
-    }
+	// reset the script on rezzing, data should be received than from httpdb.
+	// by only reseting on owner change we store our most values internal and
+	// they do not get lost, if the httpdb for the wearer is "full"
+	on_rez(integer param)
+	{
+		if (llGetOwner()!=g_keyWearer)
+		{
+			// Reset if wearer changed
+			llResetScript();
+		}
+	}
 
 
-    // listen for likend messages fromOC scripts
-    link_message(integer sender, integer num, string str, key id)
-    {
-        if (num == SUBMENU && str == g_szSubmenu)
-        {
-            //someone asked for our menu
-            //send the command through the auth system of the collar
-            llMessageLinked(LINK_SET,COMMAND_NOAUTH,g_szChatCommand,id);
-        }
-        else if (num == MENUNAME_REQUEST && str == g_szParentmenu)
-            // our parent menu requested to receive buttons, so send ours
-        {
+	// listen for likend messages fromOC scripts
+	link_message(integer sender, integer num, string str, key id)
+	{
+		if (num == SUBMENU && str == g_szSubmenu)
+		{
+			//someone asked for our menu
+			//send the command through the auth system of the collar
+			llMessageLinked(LINK_SET,COMMAND_NOAUTH,g_szChatCommand,id);
+		}
+		else if (num == MENUNAME_REQUEST && str == g_szParentmenu)
+			// our parent menu requested to receive buttons, so send ours
+		{
 
-            llMessageLinked(LINK_THIS, MENUNAME_RESPONSE, g_szParentmenu + "|" + g_szSubmenu, NULL_KEY);
-        }
-        else if (num == MENUNAME_RESPONSE)
-            // a button is send to be added to a menu
-        {
-            list parts = llParseString2List(str, ["|"], []);
-            if (llList2String(parts, 0) == g_szSubmenu)
-            {//someone wants to stick something in our menu
-                string button = llList2String(parts, 1);
-                if (llListFindList(g_lstButtons, [button]) == -1)
-                    // if the button isnt in our menu yet, than we add it
-                {
-                    g_lstButtons = llListSort(g_lstButtons + [button], 1, TRUE);
-                }
-            }
-        }
-        else if (num == HTTPDB_RESPONSE)
-            // response from httpdb have been received
-        {
-            // pares the answer
-            list params = llParseString2List(str, ["="], []);
-            string token = llList2String(params, 0);
-            string value = llList2String(params, 1);
-            // and check if any values for use are received
-            if (token == g_SettingTokenOwner )
-            {
-                g_SettingPrimary = (integer)value;
+			llMessageLinked(LINK_THIS, MENUNAME_RESPONSE, g_szParentmenu + "|" + g_szSubmenu, NULL_KEY);
+		}
+		else if (num == MENUNAME_RESPONSE)
+			// a button is send to be added to a menu
+		{
+			list parts = llParseString2List(str, ["|"], []);
+			if (llList2String(parts, 0) == g_szSubmenu)
+			{//someone wants to stick something in our menu
+				string button = llList2String(parts, 1);
+				if (llListFindList(g_lstButtons, [button]) == -1)
+					// if the button isnt in our menu yet, than we add it
+				{
+					g_lstButtons = llListSort(g_lstButtons + [button], 1, TRUE);
+				}
+			}
+		}
+		else if (num == HTTPDB_RESPONSE)
+			// response from httpdb have been received
+		{
+			// pares the answer
+			list params = llParseString2List(str, ["="], []);
+			string token = llList2String(params, 0);
+			string value = llList2String(params, 1);
+			// and check if any values for use are received
+			if (token == g_SettingTokenOwner )
+			{
+				g_SettingPrimary = (integer)value;
 				if (!g_SettingPrimaryAllowed)
 				{
 					g_SettingPrimary = FALSE;
 				}
-            }
-            else if (token == g_SettingTokenDelay)
-            {
-                g_SettingTime = (integer)value;
-            }
-        }
-        else if (num >= COMMAND_OWNER && num <= COMMAND_EVERYONE)
-            // command / chat command received
-        {
-            if (str == "reset")
-                // it is a request for a reset
-            {
-                if (num == COMMAND_WEARER || num == COMMAND_OWNER)
-                {   //only owner and wearer may reset
-                    llResetScript();
-                }
-            }                                   
-            else if (str == g_szChatCommand)
-                // an authorized user requested the plugin menu by typing the chat command
-            {             
-                DoMenu(id);
-            }
-            else if (llGetSubString(str,0,llStringLength(g_MessagesID)) == g_MessagesID+"|")
-            {
-                list args = llParseString2List(str,["|"],[]);
-                string command = llList2String(args,1);
-                
-                if (command == g_LabelCancel)
-                {
-                    if (g_PartnerKey != NULL_KEY)
-                    {
-                        llOwnerSay(g_PartnerName+" stopped the game");
-                    }
-                    
-                    ProcessCancelRequest();
-                }
-                else if (command == g_LabelPing)
-                {
-                    Debug("pinged");
+			}
+			else if (token == g_SettingTokenDelay)
+			{
+				g_SettingTime = (integer)value;
+			}
+		}
+		else if (num >= COMMAND_OWNER && num <= COMMAND_EVERYONE)
+			// command / chat command received
+		{
+			if (str == "reset")
+				// it is a request for a reset
+			{
+				if (num == COMMAND_WEARER || num == COMMAND_OWNER)
+				{	//only owner and wearer may reset
+					llResetScript();
+				}
+			}									
+			else if (str == g_szChatCommand)
+				// an authorized user requested the plugin menu by typing the chat command
+			{			  
+				DoMenu(id);
+			}
+			else if (llGetSubString(str,0,llStringLength(g_MessagesID)) == g_MessagesID+"|")
+			{
+				list args = llParseString2List(str,["|"],[]);
+				string command = llList2String(args,1);
+				
+				if (command == g_LabelCancel)
+				{
+					if (g_PartnerKey != NULL_KEY)
+					{
+						llOwnerSay(g_PartnerName+" stopped the game");
+					}
+					
+					ProcessCancelRequest();
+				}
+				else if (command == g_LabelPing)
+				{
+					Debug("pinged");
 					if ((g_GameState >= STATE_OFF) && (g_GameState < STATE_FIRSTDRAW))
 					{
 						llSay(nGetOwnerChannel(id, COLLAR_CHANNEL_OFFSET),g_MessagesID+"|"+g_LabelPong);
 					}
 				}
-                else if (command == g_LabelPong)
-                {
-                    Debug("ponged");
-                    
-                    if (g_GameState == STATE_DETECT)
-                    {
-                        g_ScanMenuIDs += [id];
-                        g_ScanMenuButtons += [llKey2Name(id)];
-                    }
-                }
-                else if (((command == g_LabelEnablePrimary) ||
-                    (command == g_LabelEnableSecondary))&&
-                    (g_GameState == STATE_DISABLED))
-                {
-                    // the message went through the authentification system
-                    if (num != COMMAND_OWNER)
-                    {
-                        Notify(id,"Only an owner can do that",FALSE);
-                    }
-                    else
-                    {
-                        if (command == g_LabelEnablePrimary)
-                        {
-                            g_SettingPrimaryAllowed = TRUE;
-                        }
-                        else
-                        {
-                            g_SettingPrimaryAllowed = FALSE;
-                            g_SettingPrimary=FALSE;
-                        }
-                        g_GameState = STATE_OFF;
-                        llOwnerSay("Game enabled");
-                    }
-                }
-                else if (command == g_LabelAsk)
-                {
-                    if (g_GameState == STATE_OFF)
-                    {
-                        g_PartnerKey = id;
-                        g_PartnerName = llKey2Name(id);
-                        g_PartnerAuthLevel = num;
-                        g_PartnerChannel = nGetOwnerChannel(id, COLLAR_CHANNEL_OFFSET);
-                        
-                        g_GamePrimary = llList2Integer(args,2);
-                        g_GameTime = llList2Integer(args,3);
-                        
-                        if (g_GamePrimary && !g_SettingPrimaryAllowed)
-                        {
-                            llOwnerSay(g_PartnerName + " asked to play a game, but your owner forbid playing with primary ownership. Please try again with secondary ownership.");
-                            llSay(g_PartnerChannel,g_MessagesID + "|" + g_LabelAnswer + "|no");
-                        }
-                        else
-                        {
-                            g_GameState = STATE_ASKED;
-                            DoMenu(g_keyWearer);
-                        }
-                    }
-                    else
-                    {
-                        llSay(g_PartnerChannel,g_MessagesID + "|" + g_LabelAnswer + "|no");
-                    }
-                }
-                else if ((command == g_LabelAnswer) && (g_GameState == STATE_ASKING))
-                {
-                    if (llList2String(args,2) == "yes")
-                    {
-                        llOwnerSay(g_PartnerName+" accepted to play");
-                        g_PartnerAuthLevel = num;
-                        llMessageLinked(LINK_SET,COMMAND_NOAUTH,g_MessagesID+"|start",g_keyWearer);
-                            // we add this step to record the authorization level of the wearer
-                        llSay(g_PartnerChannel,g_MessagesID+"|confirmed");
-                    }
-                    else if (llList2String(args,2) == "no")
-                    {
-                        llOwnerSay(g_PartnerName+" refused to play");
-                        g_GameState = STATE_OFF;
-                    }
-                }
-                else if ((command == "confirmed") &&
-                    (g_GameState == STATE_WAITCONFIRM) && (id == g_PartnerKey))
-                {
-                    llMessageLinked(LINK_SET,COMMAND_NOAUTH,g_MessagesID+"|start",g_keyWearer);
-                        // we add this step to record the authorization level of the wearer                    
-                }
-                else if ((command == "start") && (id == g_keyWearer) &&
-                    ((g_GameState == STATE_ASKING) || (g_GameState == STATE_WAITCONFIRM)))
-                {
-                    g_WearerAuthLevel = num;
-                    g_GameState = STATE_FIRSTDRAW;
-                    AskForDraw();
-                }
-                else if ((command == g_LabelCard) && (g_OtherCard == -1) && (id == g_PartnerKey))
-                {
-                    g_OtherCard = llList2Integer(args,2);
-                    g_OtherColor = llList2Integer(args,3);
-                    
-                    ProcessCard();
-                }
-                else if ((command == g_LabelDraw) && (g_GameState >= STATE_FIRSTDRAW) &&
-                    (id == g_PartnerKey))
-                {
-                    AskForDraw();
-                }
-                else if ((command == g_LabelTouchedCards) && (g_GameState >= STATE_FIRSTDRAW) &&
-                    (id == g_keyWearer))
-                {
-                    CardDraw();
-                }
-               else if ((command == g_LabelEscape) && (id == g_PartnerKey))
-                {
-                    if (g_GameState == STATE_OWNER)
-                    {
-                        llOwnerSay(g_PartnerName + " tryed to escape but failed");
-                    }
-                    else if (g_GameState == STATE_OWNERLOOSING)
-                    {
-                        llOwnerSay(g_PartnerName + " managed to escape and owns you now");
-                        g_GameState = STATE_SLAVE;
+				else if (command == g_LabelPong)
+				{
+					Debug("ponged");
+					
+					if (g_GameState == STATE_DETECT)
+					{
+						g_ScanMenuIDs += [id];
+						g_ScanMenuButtons += [llKey2Name(id)];
+					}
+				}
+				else if (((command == g_LabelEnablePrimary) ||
+					(command == g_LabelEnableSecondary))&&
+					(g_GameState == STATE_DISABLED))
+				{
+					// the message went through the authentification system
+					if (num != COMMAND_OWNER)
+					{
+						Notify(id,"Only an owner can do that",FALSE);
+					}
+					else
+					{
+						if (command == g_LabelEnablePrimary)
+						{
+							g_SettingPrimaryAllowed = TRUE;
+						}
+						else
+						{
+							g_SettingPrimaryAllowed = FALSE;
+							g_SettingPrimary=FALSE;
+						}
+						g_GameState = STATE_OFF;
+						llOwnerSay("Game enabled");
+						
+						if (id == g_keyWearer)
+						{
+							// respawn the menu if it was the wearer that enabled the game
+							DoMenu(id);
+						}
+					}
+				}
+				else if (command == g_LabelAsk)
+				{
+					if (g_GameState == STATE_OFF)
+					{
+						g_PartnerKey = id;
+						g_PartnerName = llKey2Name(id);
+						g_PartnerAuthLevel = num;
+						g_PartnerChannel = nGetOwnerChannel(id, COLLAR_CHANNEL_OFFSET);
+						
+						g_GamePrimary = llList2Integer(args,2);
+						g_GameTime = llList2Integer(args,3);
+						
+						if (g_GamePrimary && !g_SettingPrimaryAllowed)
+						{
+							llOwnerSay(g_PartnerName + " asked to play a game, but your owner forbid playing with primary ownership. Please try again with secondary ownership.");
+							llSay(g_PartnerChannel,g_MessagesID + "|" + g_LabelAnswer + "|no");
+						}
+						else
+						{
+							g_GameState = STATE_ASKED;
+							DoMenu(g_keyWearer);
+						}
+					}
+					else
+					{
+						llSay(g_PartnerChannel,g_MessagesID + "|" + g_LabelAnswer + "|no");
+					}
+				}
+				else if ((command == g_LabelAnswer) && (g_GameState == STATE_ASKING))
+				{
+					if (llList2String(args,2) == "yes")
+					{
+						llOwnerSay(g_PartnerName+" accepted to play");
+						g_PartnerAuthLevel = num;
+						llMessageLinked(LINK_SET,COMMAND_NOAUTH,g_MessagesID+"|start",g_keyWearer);
+							// we add this step to record the authorization level of the wearer
+						llSay(g_PartnerChannel,g_MessagesID+"|confirmed");
+					}
+					else if (llList2String(args,2) == "no")
+					{
+						llOwnerSay(g_PartnerName+" refused to play");
+						g_GameState = STATE_OFF;
+					}
+				}
+				else if ((command == "confirmed") &&
+					(g_GameState == STATE_WAITCONFIRM) && (id == g_PartnerKey))
+				{
+					llMessageLinked(LINK_SET,COMMAND_NOAUTH,g_MessagesID+"|start",g_keyWearer);
+						// we add this step to record the authorization level of the wearer					   
+				}
+				else if ((command == "start") && (id == g_keyWearer) &&
+					((g_GameState == STATE_ASKING) || (g_GameState == STATE_WAITCONFIRM)))
+				{
+					g_WearerAuthLevel = num;
+					g_GameState = STATE_FIRSTDRAW;
+					AskForDraw();
+				}
+				else if ((command == g_LabelCard) && (g_OtherCard == -1) && (id == g_PartnerKey))
+				{
+					g_OtherCard = llList2Integer(args,2);
+					g_OtherColor = llList2Integer(args,3);
+					
+					ProcessCard();
+				}
+				else if ((command == g_LabelDraw) && (g_GameState >= STATE_FIRSTDRAW) &&
+					(id == g_PartnerKey))
+				{
+					AskForDraw();
+				}
+				else if ((command == g_LabelTouchedCards) && (g_GameState >= STATE_FIRSTDRAW) &&
+					(id == g_keyWearer))
+				{
+					if ((g_GameState >= STATE_FIRSTDRAW) && (g_MyCard == -1))
+					{
+						CardDraw();
+					}
+					else
+					{
+						// no card to draw... spawn menu instead
+						DoMenu(g_keyWearer);
+					}
+				}
+				else if ((command == g_LabelEscape) && (id == g_PartnerKey))
+				{
+					if (g_GameState == STATE_OWNER)
+					{
+						llOwnerSay(g_PartnerName + " tryed to escape but failed");
+					}
+					else if (g_GameState == STATE_OWNERLOOSING)
+					{
+						llOwnerSay(g_PartnerName + " managed to escape and owns you now");
+						g_GameState = STATE_SLAVE;
 						SetOwnership(FALSE,FALSE);
-                    }
-                }
-            }
-        }
+					}
+				}
+			}
+		}
 
-        else if (num == COMMAND_SAFEWORD)
-            // Safeword has been received, release any restricition that should be released than
-        {
-            Debug("Safeword reveived, releasing the subs restricions as needed");
-        }
-        else if (num == DIALOG_RESPONSE)
-            // answer from menu system
-            // carefull, dont use the variable id from here for the user, you have to parse the answer from the dialog system and use the parsed variable av
-        {
-            if (id == g_keyMenuID)
-            {
-                //got a menu response meant for us, extract the values
-                list menuparams = llParseString2List(str, ["|"], []);
-                key av = (key)llList2String(menuparams, 0);
-                string message = llList2String(menuparams, 1);
-                integer page = (integer)llList2String(menuparams, 2);
-                // request to change to parent menu
-                if (message == UPMENU)
-                {
-                    // if in the detect mode, return to normal mode
-                    if (g_GameState == STATE_DETECT)
-                    {
-                        g_GameState = STATE_OFF;
-                        DoMenu(av);
-                    }
-                    else
-                    {
-                        //give av the parent menu
-                        llMessageLinked(LINK_THIS, SUBMENU, g_szParentmenu, av);
-                    }
-                }
-                else if (~llListFindList(g_lstLocalbuttons, [message]))
-                {
-                    if ((message == g_LabelCancel) || (message == g_LabelKill))
-                    {
-                        ProcessCancelRequest();
-                    }
-                    if (g_GameState == STATE_DISABLED)
-                    {
-                        if ((message == g_LabelEnablePrimary) || (message == g_LabelEnableSecondary))
-                        {
-                            // send a message through the authentification system
-                            llMessageLinked(LINK_SET,COMMAND_NOAUTH,g_MessagesID+"|"+message,av);
-                        }
-                    }
-                    //we got a response for something we handle locally
-                    else if (g_GameState == STATE_OFF)
-                    {
-                        if (message == g_LabelSettings)
-                        {
-                             DoSettingsMenu(av);
-                        }
-                        if (message == g_LabelPlay)
-                        {
-                            llOwnerSay("Detecting other players. If your partner doesn't appear in the list, ask him/her to come closer, and to check that the game is active in his/her collar.");
-                            
-                            // start scanning
-                            g_GameState = STATE_DETECT;
-                            g_ScanMenuButtons = [];
-                            llSensor("",NULL_KEY,AGENT,10.0,PI);
-                        }
-                        if (message == g_LabelDisable)
-                        {
-                            llOwnerSay("Game disabled");
-                            g_GameState = STATE_DISABLED;
-                        }
-                    }
-                    else if (g_GameState == STATE_DETECT)
-                    {
-                        integer partnerNum = llListFindList(g_ScanMenuButtons,[message]);
-                        
-                        if (partnerNum>=0)
-                        {
-                            g_PartnerKey = llList2Key(g_ScanMenuIDs,partnerNum);
-                            g_PartnerName = message;
-                            g_PartnerChannel = nGetOwnerChannel(g_PartnerKey, COLLAR_CHANNEL_OFFSET);
-                            llOwnerSay("Asking " + message + " for a game");
-                            
-                            llSay(g_PartnerChannel,g_MessagesID+"|"+g_LabelAsk+
-                                "|"+(string)g_SettingPrimary+
-                                "|"+(string)g_SettingTime);
-                            
-                            g_GameState = STATE_ASKING;
-                            g_GamePrimary = g_SettingPrimary;
-                            g_GameTime = g_SettingTime;
-                        }
-                    }
-                    else if (g_GameState == STATE_ASKED)
-                    {
-                        if (message == "Yes")
-                        {
-                            llSay(g_PartnerChannel,g_MessagesID+"|"+
-                                g_LabelAnswer+"|yes");
-                            g_GameState = STATE_WAITCONFIRM;
-                        }
-                        else if (message == "No")
-                        {
-                            llSay(g_PartnerChannel,g_MessagesID+"|"+
-                                g_LabelAnswer+"|no");
-                            g_GameState = STATE_OFF;
-                        }
-                    }
-                    else if ((message == g_LabelDraw) &&
-                        (g_GameState >= STATE_OWNER))
-                    {
-                        ClearCards();
-                        llSay(g_PartnerChannel,g_MessagesID+"|"+g_LabelDraw);
-                        CardDraw();
-                    }
-                    else if (message == g_LabelEscape)
-                    {
-                        llSay(g_PartnerChannel,g_MessagesID+"|"+g_LabelEscape);
-                        if (g_GameState == STATE_FREESLAVE)
-                        {
-                            llOwnerSay("You managed to escape and are now owning " +
-                                g_PartnerName);
-                            g_GameState = STATE_OWNER;
+		else if (num == COMMAND_SAFEWORD)
+			// Safeword has been received, release any restricition that should be released than
+		{
+			Debug("Safeword reveived, releasing the subs restricions as needed");
+		}
+		else if (num == DIALOG_RESPONSE)
+			// answer from menu system
+			// carefull, dont use the variable id from here for the user, you have to parse the answer from the dialog system and use the parsed variable av
+		{
+			if (id == g_keyMenuID)
+			{
+				//got a menu response meant for us, extract the values
+				list menuparams = llParseString2List(str, ["|"], []);
+				key av = (key)llList2String(menuparams, 0);
+				string message = llList2String(menuparams, 1);
+				integer page = (integer)llList2String(menuparams, 2);
+				// request to change to parent menu
+				if (message == UPMENU)
+				{
+					// if in the detect mode, return to normal mode
+					if (g_GameState == STATE_DETECT)
+					{
+						g_GameState = STATE_OFF;
+						DoMenu(av);
+					}
+					else
+					{
+						//give av the parent menu
+						llMessageLinked(LINK_THIS, SUBMENU, g_szParentmenu, av);
+					}
+				}
+				else if (~llListFindList(g_lstLocalbuttons, [message]))
+				{
+					if ((message == g_LabelCancel) || (message == g_LabelKill))
+					{
+						ProcessCancelRequest();
+					}
+					if (g_GameState == STATE_DISABLED)
+					{
+						if ((message == g_LabelEnablePrimary) || (message == g_LabelEnableSecondary))
+						{
+							// send a message through the authentification system
+							llMessageLinked(LINK_SET,COMMAND_NOAUTH,g_MessagesID+"|"+message,av);
+						}
+					}
+					//we got a response for something we handle locally
+					else if (g_GameState == STATE_OFF)
+					{
+						if (message == g_LabelSettings)
+						{
+							 DoSettingsMenu(av);
+						}
+						if (message == g_LabelPlay)
+						{
+							llOwnerSay("Detecting other players. If your partner doesn't appear in the list, ask him/her to come closer, and to check that the game is active in his/her collar.");
+							
+							// start scanning
+							g_GameState = STATE_DETECT;
+							g_ScanMenuButtons = [];
+							llSensor("",NULL_KEY,AGENT,10.0,PI);
+						}
+						if (message == g_LabelDisable)
+						{
+							llOwnerSay("Game disabled");
+							g_GameState = STATE_DISABLED;
+						}
+					}
+					else if (g_GameState == STATE_DETECT)
+					{
+						integer partnerNum = llListFindList(g_ScanMenuButtons,[message]);
+						
+						if (partnerNum>=0)
+						{
+							g_PartnerKey = llList2Key(g_ScanMenuIDs,partnerNum);
+							g_PartnerName = message;
+							g_PartnerChannel = nGetOwnerChannel(g_PartnerKey, COLLAR_CHANNEL_OFFSET);
+							llOwnerSay("Asking " + message + " for a game");
+							
+							llSay(g_PartnerChannel,g_MessagesID+"|"+g_LabelAsk+
+								"|"+(string)g_SettingPrimary+
+								"|"+(string)g_SettingTime);
+							
+							g_GameState = STATE_ASKING;
+							g_GamePrimary = g_SettingPrimary;
+							g_GameTime = g_SettingTime;
+						}
+					}
+					else if (g_GameState == STATE_ASKED)
+					{
+						if (message == "Yes")
+						{
+							llSay(g_PartnerChannel,g_MessagesID+"|"+
+								g_LabelAnswer+"|yes");
+							g_GameState = STATE_WAITCONFIRM;
+						}
+						else if (message == "No")
+						{
+							llSay(g_PartnerChannel,g_MessagesID+"|"+
+								g_LabelAnswer+"|no");
+							g_GameState = STATE_OFF;
+						}
+					}
+					else if ((message == g_LabelDraw) &&
+						(g_GameState >= STATE_OWNER))
+					{
+						ClearCards();
+						llSay(g_PartnerChannel,g_MessagesID+"|"+g_LabelDraw);
+						CardDraw();
+					}
+					else if (message == g_LabelEscape)
+					{
+						llSay(g_PartnerChannel,g_MessagesID+"|"+g_LabelEscape);
+						if (g_GameState == STATE_FREESLAVE)
+						{
+							llOwnerSay("You managed to escape and are now owning " +
+								g_PartnerName);
+							g_GameState = STATE_OWNER;
 							ShowCard(FALSE,g_OtherColor,g_OtherCard);
 							SetOwnership(TRUE,FALSE);
-                        }
-                        else if (g_GameState == STATE_SLAVE)
-                        {
-                            llOwnerSay("Your escape attempt failed");
-                        }
-                    }
-                }
-                else if (~llListFindList(g_lstButtons, [message]))
-                {
-                    //we got a command which another command pluged into our menu
-                    llMessageLinked(LINK_THIS, SUBMENU, message, av);
-                }
-            }
-            else if (id == g_SettingsMenuKey)
-            {
-                //got a menu response meant for us, extract the values
-                list menuparams = llParseString2List(str, ["|"], []);
-                key av = (key)llList2String(menuparams, 0);
-                string message = llList2String(menuparams, 1);
-                integer page = (integer)llList2String(menuparams, 2);
-                integer optionNum = llListFindList(g_SettingsMenuButtons,[message]);
-                // request to change to parent menu
-                if (message == UPMENU)
-                {
-                    //give av the parent menu
-                    llMessageLinked(LINK_THIS, SUBMENU, g_szParentmenu, av);
-                    return;
-                }
-                else if (optionNum == 0)
-                {
+						}
+						else if (g_GameState == STATE_SLAVE)
+						{
+							llOwnerSay("Your escape attempt failed");
+						}
+					}
+				}
+				else if (~llListFindList(g_lstButtons, [message]))
+				{
+					//we got a command which another command pluged into our menu
+					llMessageLinked(LINK_THIS, SUBMENU, message, av);
+				}
+			}
+			else if (id == g_SettingsMenuKey)
+			{
+				//got a menu response meant for us, extract the values
+				list menuparams = llParseString2List(str, ["|"], []);
+				key av = (key)llList2String(menuparams, 0);
+				string message = llList2String(menuparams, 1);
+				integer page = (integer)llList2String(menuparams, 2);
+				integer optionNum = llListFindList(g_SettingsMenuButtons,[message]);
+				// request to change to parent menu
+				if (message == UPMENU)
+				{
+					//give av the parent menu
+					llMessageLinked(LINK_THIS, SUBMENU, g_szParentmenu, av);
+					return;
+				}
+				else if (optionNum == 0)
+				{
 					if (g_SettingPrimaryAllowed)
 					{
 						// owner = primary
@@ -1224,81 +1349,81 @@ default
 						llOwnerSay("Your owner didn't allow you to play as primary owner");
 					}
 				}
-                else if (optionNum == 1)
-                {
-                    // owner = secondary
-                    g_SettingPrimary=FALSE;
-                    llMessageLinked(LINK_SET, HTTPDB_SAVE,
-                        g_SettingTokenOwner+"="+(string)g_SettingPrimary, NULL_KEY);
-                }
-                else if (optionNum >= 2)
-                {
-                    // delay
-                    g_SettingTime = llList2Integer(g_SettingsMenuDelays,optionNum);
-                    llMessageLinked(LINK_SET, HTTPDB_SAVE,
-                        g_SettingTokenDelay+"="+(string)g_SettingTime, NULL_KEY);                    
-                }
-                DoSettingsMenu(av);
-            }
-            else if (id == g_DrawMenuID)
-            {
-                list menuparams = llParseString2List(str, ["|"], []);
-                key av = (key)llList2String(menuparams, 0);
-                string message = llList2String(menuparams, 1);
-                integer page = (integer)llList2String(menuparams, 2);
+				else if (optionNum == 1)
+				{
+					// owner = secondary
+					g_SettingPrimary=FALSE;
+					llMessageLinked(LINK_SET, HTTPDB_SAVE,
+						g_SettingTokenOwner+"="+(string)g_SettingPrimary, NULL_KEY);
+				}
+				else if (optionNum >= 2)
+				{
+					// delay
+					g_SettingTime = llList2Integer(g_SettingsMenuDelays,optionNum);
+					llMessageLinked(LINK_SET, HTTPDB_SAVE,
+						g_SettingTokenDelay+"="+(string)g_SettingTime, NULL_KEY);					 
+				}
+				DoSettingsMenu(av);
+			}
+			else if (id == g_DrawMenuID)
+			{
+				list menuparams = llParseString2List(str, ["|"], []);
+				key av = (key)llList2String(menuparams, 0);
+				string message = llList2String(menuparams, 1);
+				integer page = (integer)llList2String(menuparams, 2);
 
-                if (message == g_LabelDraw)
-                {
-                    CardDraw();
-                }
-                else
-                {
-                    //we got a command which another command pluged into our menu
-                    llMessageLinked(LINK_THIS, SUBMENU, message, av);
-                }
-            }
-        }
-        else if (num == DIALOG_TIMEOUT)
-            // tiimout from menu system, you do not have to react on this, but you can
-        {
-            if (id == g_keyMenuID)
-                // if you treact, make sure the timout is for your menu by checking the g_keyMenuID variable
-            {
-                Debug("The user was to slow or lazy, we got a timeout");
-            }
-        }
-    }
-    
-    sensor(integer total_number) // total_number is the number of avatars detected.
-    {
-        integer i;
-        
-        for (i = 0; i < total_number; i++)
-        {
-            llSay(nGetOwnerChannel(llDetectedKey(i), COLLAR_CHANNEL_OFFSET),g_MessagesID+"|"+
-                g_LabelPing);
-            Debug("Pinging "+llDetectedName(i));
-        }
-        
-        // set a timer to show the menu
-        llSetTimerEvent(10);
-    }
-    
-    // if nobody is within 10 meters, say so.
-    no_sensor() {
-        llOwnerSay("No players found...");
-        DoMenu(g_keyWearer);
-    }
-    
-    timer()
-    {
-        llSetTimerEvent(0);
-        
-        if (g_GameState == STATE_DETECT)
-        {
-            DoMenu(g_keyWearer);
-        }
-    }
+				if (message == g_LabelDraw)
+				{
+					CardDraw();
+				}
+				else
+				{
+					//we got a command which another command pluged into our menu
+					llMessageLinked(LINK_THIS, SUBMENU, message, av);
+				}
+			}
+		}
+		else if (num == DIALOG_TIMEOUT)
+			// tiimout from menu system, you do not have to react on this, but you can
+		{
+			if (id == g_keyMenuID)
+				// if you treact, make sure the timout is for your menu by checking the g_keyMenuID variable
+			{
+				Debug("The user was to slow or lazy, we got a timeout");
+			}
+		}
+	}
+	
+	sensor(integer total_number) // total_number is the number of avatars detected.
+	{
+		integer i;
+		
+		for (i = 0; i < total_number; i++)
+		{
+			llSay(nGetOwnerChannel(llDetectedKey(i), COLLAR_CHANNEL_OFFSET),g_MessagesID+"|"+
+				g_LabelPing);
+			Debug("Pinging "+llDetectedName(i));
+		}
+		
+		// set a timer to show the menu
+		llSetTimerEvent(10);
+	}
+	
+	// if nobody is within 10 meters, say so.
+	no_sensor() {
+		llOwnerSay("No players found...");
+		DoMenu(g_keyWearer);
+	}
+	
+	timer()
+	{
+		llSetTimerEvent(0);
+		
+		if (g_GameState == STATE_DETECT)
+		{
+			DoMenu(g_keyWearer);
+		}
+	}
 }
 
 
