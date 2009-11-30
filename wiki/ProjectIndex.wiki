@@ -1,0 +1,13 @@
+#summary Introduction asd list of sub-projects
+
+This project regroups several Second Life opensource scripts originally written by Jeff Mantel. Most of them are related to [http://code.google.com/p/opencollar/ OpenCollar] or [http://wiki.secondlife.com/wiki/RestrainedLifeAPI RLV].
+
+= Sub-projects =
+
+  * CardGame: an OpenCollar add-on for switches, that can exchange their roles based on cards
+
+More to come ;)
+
+= Site =
+
+For more details, please check out my [http://sites.google.com/site/jeffmantelsdesigns/ web site].
