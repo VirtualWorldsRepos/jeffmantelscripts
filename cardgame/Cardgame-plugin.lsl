@@ -47,6 +47,11 @@ integer g_PartnerAuthLevel;
 integer g_WearerAuthLevel;
 integer g_GamePrimary;
 integer g_GameTime;
+integer g_GamePartnerPreviousAuthLevel;
+integer g_GamePartnerAuthLevel;
+integer g_GameWearerPreviousAuthLevel;
+integer g_GameWearerAuthLevel;
+
 
 integer g_MyCard;
 integer g_MyColor;
@@ -65,20 +70,21 @@ list g_lstButtons;
 
 // labels
 string g_LabelHelp = "Help";
+string g_LabelGetHUD = "Get HUD"
 string g_LabelEnablePrimary = "Primary";
 string g_LabelEnableSecondary = "Secondary";
 string g_LabelDisable = "Disable";
-string g_LabelKill = "kill";
+string g_LabelKill = "Kill";
 string g_LabelSettings = "Settings";
 string g_LabelPlay = "Play";
-string g_LabelDraw = "draw";
-string g_LabelCancel = "stop";
-string g_LabelEscape = "try escape";
-string g_LabelCard = "card";
-string g_LabelPing = "ping";
-string g_LabelPong = "pong";
-string g_LabelAsk = "ask";
-string g_LabelAnswer = "answer";
+string g_LabelDraw = "Draw";
+string g_LabelCancel = "Stop";
+string g_LabelEscape = "Try escape";
+string g_LabelCard = "Card";
+string g_LabelPing = "Ping";
+string g_LabelPong = "Pong";
+string g_LabelAsk = "Ask";
+string g_LabelAnswer = "Answer";
 string g_LabelMyCard = "My";
 string g_LabelOtherCard = "Other";
 string g_LabelResetCards = "resetcards";
@@ -89,17 +95,17 @@ string g_LabelTouchedCards = "touchedCards";
 list g_DisabledMenuButtons = [g_LabelHelp,g_LabelEnablePrimary,g_LabelEnableSecondary];
 
 // enabled menu for everyone except the wearer
-list g_EnableMenuOthersButtons = [g_LabelHelp, g_LabelKill];
+list g_EnabledMenuOthersButtons = [g_LabelHelp, g_LabelKill];
 
 // off menu
-list g_OffMenuButtons = [g_LabelHelp,g_LabelSettings,g_LabelPlay,g_LabelDisable];
+list g_OffMenuButtons = [g_LabelHelp,g_LabelGetHUD,g_LabelSettings,g_LabelPlay,g_LabelDisable];
 
 // owner menu
-list g_OwnerMenu = [g_LabelHelp, g_LabelDraw, g_LabelCancel ];
-list g_OwnerLostMenu = [g_LabelHelp, g_LabelCancel ];
+list g_OwnerMenu = [g_LabelHelp, g_LabelGetHUD, g_LabelDraw, g_LabelCancel ];
+list g_OwnerLostMenu = [g_LabelHelp, g_LabelGetHUD, g_LabelCancel ];
 
 // slave menu
-list g_SlaveMenu = [g_LabelHelp, g_LabelEscape];
+list g_SlaveMenu = [g_LabelHelp, g_LabelGetHUD, g_LabelEscape];
 
 // settings menu
 // be carfeul if you change the order of the buttons, need to edit the function
@@ -111,12 +117,11 @@ key g_SettingsMenuKey=NULL_KEY;
 list g_ScanMenuButtons;
 list g_ScanMenuIDs;
 
-// draw menu
-key g_DrawMenuID=NULL_KEY;
+// settings database token
+string g_SettingsToken = "jm_cardgame";
 
-// settings database tokens
-string g_SettingTokenOwner = "jm_cardgame_owner";
-string g_SettingTokenDelay = "jm_cardgame_delay";
+// separator character in database entry values
+string d_SettingsSeparator = "|";
 
 // internal messages id
 string g_MessagesID = "jm_cardgame";
@@ -311,6 +316,7 @@ integer nStartsWith(string szHaystack, string szNeedle) // http://wiki.secondlif
 	return (llDeleteSubString(szHaystack, llStringLength(szNeedle), -1) == szNeedle);
 }
 
+
 //===============================================================================
 //= parameters	 :	  string	keyID	key of person requesting the menu
 //=
@@ -345,7 +351,7 @@ DoMenu(key keyID)
 		}
 		prompt += "\nOnly the owner can kill the game";
 		
-		g_lstLocalbuttons = g_EnableMenuOthersButtons;
+		g_lstLocalbuttons = g_EnabledMenuOthersButtons;
 	}
 	else if (g_GameState == STATE_OFF)
 	{
@@ -429,6 +435,7 @@ DoMenu(key keyID)
 	g_keyMenuID = Dialog(keyID, prompt, mybuttons, [UPMENU], 0);
 }
 
+
 //===============================================================================
 //= parameters	 :	  string	keyID	key of person requesting the menu
 //=
@@ -483,6 +490,7 @@ DoSettingsMenu(key keyID)
 	g_SettingsMenuKey = Dialog(keyID, prompt, g_SettingsMenuButtons, [UPMENU], 0);
 }
 
+
 //===============================================================================
 //= parameters :		integer	isOwner		TRUE if wearer becomes the owner of the partner
 //= 					integer	first		TRUE if it is the first time that we set ownerships in the game
@@ -495,97 +503,70 @@ DoSettingsMenu(key keyID)
 
 SetOwnership(integer isOwner, integer first)
 {
+	if (first)
+	{
+		g_GamePartnerPreviousAuthLevel = g_PartnerAuthLevel;
+		g_GameWearerPreviousAuthLevel = g_WearerAuthLevel;
+	}
+	else
+	{
+		g_GamePartnerPreviousAuthLevel = g_GamePartnerAuthLevel;
+		g_GameWearerPreviousAuthLevel = g_GameWearerAuthLevel;
+	}
+
+	// new auth levels
 	if (isOwner)
 	{
-		if (first)
+		//  partner doesn't own us
+		g_GamePartnerAuthLevel = COMMAND_EVERYONE;
+		
+		// we own ourselves
+		if (g_GamePrimary)
 		{
-			// Gain own ownership
-			if (g_SettingPrimary && (g_WearerAuthLevel == COMMAND_SECOWNER))
-			{
-				// remove secondary ownership and set primary instead
-				RemoveOwner(llKey2Name(g_keyWearer),FALSE);
-				AddOwner(llKey2Name(g_keyWearer),TRUE);
-			}
-			else if (g_SettingPrimary && (g_WearerAuthLevel == COMMAND_OWNER))
-			{
-				// already own primary owner
-			}
-			else if ((!g_SettingPrimary) && (g_WearerAuthLevel == COMMAND_SECOWNER))
-			{
-				// already own secondary owner
-			}
-			else
-			{
-				AddOwner(llKey2Name(g_keyWearer),g_SettingPrimary);
-			}
-			
-			// remove ownership form other, if applicable
-			if ((!g_SettingPrimary) && (g_PartnerAuthLevel == COMMAND_OWNER))
-			{
-			}
-			else if (g_PartnerAuthLevel == COMMAND_OWNER)
-			{
-				RemoveOwner(g_PartnerName,TRUE);
-			}
-			else if (g_PartnerAuthLevel == COMMAND_SECOWNER)
-			{
-				RemoveOwner(g_PartnerName,FALSE);
-			}
+			g_GameWearerAuthLevel = COMMAND_OWNER;
 		}
 		else
 		{
-			RemoveOwner(g_PartnerName,g_SettingPrimary);
-			AddOwner(llKey2Name(g_keyWearer),g_SettingPrimary);
+			g_GameWearerAuthLevel = COMMAND_SECOWNER;
 		}
 	}
 	else
 	{
-		if (first)
+		// partner owns us
+		if (g_GamePrimary)
 		{
-			// remove self ownership, if applicable
-			if ((!g_SettingPrimary) && (g_WearerAuthLevel == COMMAND_OWNER))
-			{
-			}
-			else if (g_WearerAuthLevel == COMMAND_OWNER)
-			{
-				RemoveOwner(llKey2Name(g_keyWearer),TRUE);
-			}
-			else if (g_WearerAuthLevel == COMMAND_SECOWNER)
-			{
-				RemoveOwner(llKey2Name(g_keyWearer),FALSE);
-			}
-			
-			// Other gains ownership
-			if (g_SettingPrimary && (g_PartnerAuthLevel == COMMAND_SECOWNER))
-			{
-				// remove secondary ownership and set primary instead
-				RemoveOwner(g_PartnerName,FALSE);
-				AddOwner(g_PartnerName,TRUE);
-			}
-			else if (g_SettingPrimary && (g_PartnerAuthLevel == COMMAND_OWNER))
-			{
-				// already owns us as primary
-			}
-			else if ((!g_SettingPrimary) && (g_PartnerAuthLevel == COMMAND_SECOWNER))
-			{
-				// already owns us as secondary
-			}
-			else
-			{
-				AddOwner(g_PartnerName,g_SettingPrimary);
-			}
+			g_GamePartnerAuthLevel = COMMAND_OWNER;
 		}
 		else
 		{
-			RemoveOwner(llKey2Name(g_keyWearer),g_SettingPrimary);
-			AddOwner(g_PartnerName,g_SettingPrimary);
+			g_GamePartnerAuthLevel = COMMAND_SECOWNER;
+		}
+		
+		// we don't own ourselves
+		g_GameWearerAuthLevel = COMMAND_EVERYONE;
+	}
+	
+	// override: if game is using secondary only, we don't change any primary ownership
+	if (!g_GamePrimary)
+	{
+		if (g_GamePartnerPreviousAuthLevel == COMMAND_OWNER)
+		{
+			g_GamePartnerAuthLevel = COMMAND_OWNER;
+		}
+		
+		if (g_GameWearerPreviousAuthLevel == COMMAND_OWNER)
+		{
+			g_GameWearerAuthLevel = COMMAND_OWNER;
 		}
 	}
+	
+	// apply changes
+	ApplyOwnership();
 }
 
 
 //===============================================================================
-//= parameters :		integer	wasOwner	TRUE if wearer was owner of the partner before the game ended
+//= parameters :		none
 //=
 //= return :			none
 //=
@@ -593,85 +574,65 @@ SetOwnership(integer isOwner, integer first)
 //=
 //===============================================================================
 
-ResetOwnership(integer wasOwner)
+ResetOwnership()
 {
-	if (wasOwner)
-	{
-		// own ownership
-		if (g_WearerAuthLevel == COMMAND_OWNER)
-		{
-			if (!g_SettingPrimary)
-			{
-				// can remove secondary ownership
-				RemoveOwner(llKey2Name(g_keyWearer),FALSE);
-			}
-		}
-		else if (g_WearerAuthLevel == COMMAND_SECOWNER)
-		{
-			if (g_SettingPrimary)
-			{
-				// remove primary and put back secondary
-				RemoveOwner(llKey2Name(g_keyWearer),TRUE);
-				AddOwner(llKey2Name(g_keyWearer),FALSE);
-			}
-		}
-		else
-		{
-			RemoveOwner(llKey2Name(g_keyWearer),g_SettingPrimary);
-		}
-		
-		// other ownership
-		if (g_PartnerAuthLevel == COMMAND_OWNER)
-		{
-			if (g_SettingPrimary)
-			{
-				AddOwner(g_PartnerName,TRUE);
-			}
-		}
-		else if (g_PartnerAuthLevel == COMMAND_SECOWNER)
-		{
-			AddOwner(g_PartnerName,FALSE);
-		}
-	}
-	else
-	{
-		// own ownership
-		if (g_WearerAuthLevel == COMMAND_OWNER)
-		{
-			if (g_SettingPrimary)
-			{
-				AddOwner(llKey2Name(g_keyWearer),TRUE);
-			}
-		}
-		else if (g_WearerAuthLevel == COMMAND_SECOWNER)
-		{
-			AddOwner(llKey2Name(g_keyWearer),g_WearerAuthLevel);
-		}
-		
-		// other ownership
-		if (g_PartnerAuthLevel == COMMAND_OWNER)
-		{
-			if (!g_SettingPrimary)
-			{
-				// can remove secondary ownership
-				RemoveOwner(g_PartnerName,FALSE);
-			}
-		}
-		else if (g_PartnerAuthLevel == COMMAND_SECOWNER)
-		{
-			if (g_SettingPrimary)
-			{
-				// remove primary and put back secondary
-				RemoveOwner(g_PartnerName,TRUE);
-				AddOwner(g_PartnerName,FALSE);
-			}
-		}
-		else
-		{
-			RemoveOwner(g_PartnerName,g_SettingPrimary);
-		}
-	}
+	g_GamePartnerPreviousAuthLevel = g_GamePartnerAuthLevel;
+	g_GameWearerPreviousAuthLevel = g_GameWearerAuthLevel;
+	
+	g_GamePartnerAuthLevel = g_PartnerAuthLevel;
+	g_GameWearerAuthLevel = g_WearerAuthLevel;
+	
+	ApplyOwnership();
 }
+
+
+//===============================================================================
+//= parameters :		none
+//=
+//= return :			none
+//=
+//= description	 :		apply new ownership rules
+//=
+//===============================================================================
+
+ApplyOwnership()
+{
+	// first remove ownerships
+	if ((g_GameWearerPreviousAuthLevel == COMMAND_OWNER) && (g_GameWearerAuthLevel != COMMAND_OWNER))
+	{
+		RemoveOwner(llKey2Name(g_keyWearer),TRUE);
+	}
+	if ((g_GameWearerPreviousAuthLevel == COMMAND_SECOWNER) && (g_GameWearerAuthLevel != COMMAND_SECOWNER))
+	{
+		RemoveOwner(llKey2Name(g_keyWearer),FALSE);
+	}
+	if ((g_GamePartnerPreviousAuthLevel == COMMAND_OWNER) && (g_GamePartnerAuthLevel != COMMAND_OWNER))
+	{
+		RemoveOwner(g_PartnerName,TRUE);
+	}
+	if ((g_GamePartnerPreviousAuthLevel == COMMAND_SECOWNER) && (g_GamePartnerAuthLevel != COMMAND_SECOWNER))
+	{
+		RemoveOwner(g_PartnerName,FALSE);
+	}
+	
+	// and add new ownerships
+	if ((g_GameWearerAuthLevel == COMMAND_OWNER) && (g_GameWearerPreviousAuthLevel != COMMAND_OWNER))
+	{
+		AddOwner(llKey2Name(g_keyWearer),TRUE);
+	}
+	if ((g_GameWearerAuthLevel == COMMAND_SECOWNER) && (g_GameWearerPreviousAuthLevel != COMMAND_SECOWNER))
+	{
+		AddOwner(llKey2Name(g_keyWearer),FALSE);
+	}
+	if ((g_GamePartnerAuthLevel == COMMAND_OWNER) && (g_GamePartnerPreviousAuthLevel != COMMAND_OWNER))
+	{
+		AddOwner(g_PartnerName,TRUE);
+	}
+	if ((g_GamePartnerAuthLevel == COMMAND_SECOWNER) && (g_GamePartnerPreviousAuthLevel != COMMAND_SECOWNER))
+	{
+		AddOwner(g_PartnerName,FALSE);
+	}
+}	
 
 
 //===============================================================================
@@ -702,6 +663,7 @@ AddOwner(string name, integer primary)
 	
 }
 
+
 //===============================================================================
 //= parameters :		string		name		Name of the avatar to remove
 //=						integer		primary		TRUE if avatar was a primary owner
@@ -729,6 +691,7 @@ RemoveOwner(string name, integer primary)
 	llOwnerSay("removed " + name);
 }
 
+
 //===============================================================================
 //= parameters	 :	  none
 //=
@@ -742,6 +705,62 @@ string GetDBPrefix()
 {//get db prefix from list in object desc
 	return llList2String(llParseString2List(llGetObjectDesc(), ["~"], []), 2);
 }
+
+
+//===============================================================================
+//= parameters :		list		settings	list of settings values
+//=						integer		local		TRUE if this is local settings, FALSE if it is the db
+//=
+//= return :			none
+//=
+//= description	 :		called when settings are received from the database
+//=
+//===============================================================================
+
+ReceivedSettings(list settings, integer local)
+{
+	g_SettingPrimary = llList2Integer(settings,0);
+	if (!g_SettingPrimaryAllowed)
+	{
+		g_SettingPrimary = FALSE;
+	}
+	
+	g_SettingTime = llList2Integer(settings,1);
+}	
+
+
+
+//===============================================================================
+//= parameters :		integer		local		TRUE if this is local settings, FALSE if it is the db
+//=
+//= return :			none
+//=
+//= description	 :		save settings in local or remote database
+//=
+//===============================================================================
+
+SendSettings(integer local)
+{
+	list settings;
+	
+	// fill in the settings list with your settings
+	settings = [ g_SettingPrimary, g_SettingTime];
+	
+	// send request
+	integer requestType;
+
+	if (local)
+	{
+		requestType = LOCALSETTINGS_SAVE;
+	}
+	else
+	{
+		requestType = HTTPDB_SAVE;
+	}
+	
+	llMessageLinked(LINK_SET, requestType,g_SettingsToken+"="+
+		llDumpList2String(settings,d_SettingsSeparator), NULL_KEY);	
+}	
 
 //===============================================================================
 //= parameters	 :	  none
@@ -761,6 +780,7 @@ ClearCards()
 	
 	llSay(nGetOwnerChannel(g_keyWearer,CARD_CHANNEL_OFFSET),g_MessagesID+"|"+g_LabelResetCards);
 }
+
 
 //===============================================================================
 //= parameters :	integer		myCard		TRUE if it is the wearer's card that must be shown
@@ -825,13 +845,9 @@ ProcessCancelRequest()
 		llSay(g_PartnerChannel,g_MessagesID+"|" + g_LabelCancel);
 	}
 	
-	if ((g_GameState == STATE_OWNER) || (g_GameState == STATE_OWNERLOOSING))
+	if (g_GameState > STATE_FIRSTDRAW)
 	{
-		ResetOwnership(TRUE);
-	}
-	else if ((g_GameState == STATE_SLAVE) || (g_GameState == STATE_FREESLAVE))
-	{
-		ResetOwnership(FALSE);
+		ResetOwnership();
 	}
 	
 	g_GameState = STATE_OFF;
@@ -991,25 +1007,25 @@ default
 				}
 			}
 		}
-		else if (num == HTTPDB_RESPONSE)
-			// response from httpdb have been received
+		else if ((num == HTTPDB_RESPONSE) || (num == LOCALSETTING_RESPONSE))
+			// settings received
 		{
-			// pares the answer
+			// parse the answer
 			list params = llParseString2List(str, ["="], []);
 			string token = llList2String(params, 0);
 			string value = llList2String(params, 1);
 			// and check if any values for use are received
-			if (token == g_SettingTokenOwner )
+			if (token == g_SettingsToken)
 			{
-				g_SettingPrimary = (integer)value;
-				if (!g_SettingPrimaryAllowed)
+				list values = llParseString2List(value, [g_SettingsSeparator], []);
+				if (num == HTTPDB_RESPONSE)
 				{
-					g_SettingPrimary = FALSE;
+					ReceivedSettings(values, FALSE);
 				}
-			}
-			else if (token == g_SettingTokenDelay)
-			{
-				g_SettingTime = (integer)value;
+				else
+				{
+					ReceivedSettings(values, TRUE);
+				}					
 			}
 		}
 		else if (num >= COMMAND_OWNER && num <= COMMAND_EVERYONE)
@@ -1159,8 +1175,7 @@ default
 				{
 					AskForDraw();
 				}
-				else if ((command == g_LabelTouchedCards) && (g_GameState >= STATE_FIRSTDRAW) &&
-					(id == g_keyWearer))
+				else if ((command == g_LabelTouchedCards) && (id == g_keyWearer))
 				{
 					if ((g_GameState >= STATE_FIRSTDRAW) && (g_MyCard == -1))
 					{
@@ -1176,7 +1191,7 @@ default
 				{
 					if (g_GameState == STATE_OWNER)
 					{
-						llOwnerSay(g_PartnerName + " tryed to escape but failed");
+						llOwnerSay(g_PartnerName + " tried to escape but failed");
 					}
 					else if (g_GameState == STATE_OWNERLOOSING)
 					{
@@ -1191,7 +1206,8 @@ default
 		else if (num == COMMAND_SAFEWORD)
 			// Safeword has been received, release any restricition that should be released than
 		{
-			Debug("Safeword reveived, releasing the subs restricions as needed");
+			// stop game
+			ProcessCancelRequest();
 		}
 		else if (num == DIALOG_RESPONSE)
 			// answer from menu system
@@ -1341,8 +1357,7 @@ default
 					{
 						// owner = primary
 						g_SettingPrimary=TRUE;
-						llMessageLinked(LINK_SET, HTTPDB_SAVE,
-							g_SettingTokenOwner+"="+(string)g_SettingPrimary, NULL_KEY);
+						SendSettings(FALSE);
 					}
 					else
 					{
@@ -1353,34 +1368,15 @@ default
 				{
 					// owner = secondary
 					g_SettingPrimary=FALSE;
-					llMessageLinked(LINK_SET, HTTPDB_SAVE,
-						g_SettingTokenOwner+"="+(string)g_SettingPrimary, NULL_KEY);
+					SendSettings(FALSE);
 				}
 				else if (optionNum >= 2)
 				{
 					// delay
 					g_SettingTime = llList2Integer(g_SettingsMenuDelays,optionNum);
-					llMessageLinked(LINK_SET, HTTPDB_SAVE,
-						g_SettingTokenDelay+"="+(string)g_SettingTime, NULL_KEY);					 
+					SendSettings(FALSE);			 
 				}
 				DoSettingsMenu(av);
-			}
-			else if (id == g_DrawMenuID)
-			{
-				list menuparams = llParseString2List(str, ["|"], []);
-				key av = (key)llList2String(menuparams, 0);
-				string message = llList2String(menuparams, 1);
-				integer page = (integer)llList2String(menuparams, 2);
-
-				if (message == g_LabelDraw)
-				{
-					CardDraw();
-				}
-				else
-				{
-					//we got a command which another command pluged into our menu
-					llMessageLinked(LINK_THIS, SUBMENU, message, av);
-				}
 			}
 		}
 		else if (num == DIALOG_TIMEOUT)
