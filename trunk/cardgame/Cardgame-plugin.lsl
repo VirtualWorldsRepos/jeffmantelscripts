@@ -90,6 +90,7 @@ string g_LabelOtherCard = "Other";
 string g_LabelResetCards = "resetcards";
 string g_LabelShowCard = "showcard";
 string g_LabelTouchedCards = "touchedCards";
+string g_LabelDeferredDetect = "deferredDetect";
 
 // disabled menu
 list g_DisabledMenuButtons = [g_LabelHelp,g_LabelEnablePrimary,g_LabelEnableSecondary];
@@ -125,6 +126,14 @@ string g_SettingsSeparator = "|";
 
 // internal messages id
 string g_MessagesID = "jm_cardgame";
+
+// if wearer has a COMMAND_OWNER level, it can mean that the primary owner list is empty, or that the wearer is
+// on the primary owner list. Sometimes we need to know what case we are in. To prevent from having to do the
+// detection multiple times, we store the result of this detection here
+integer IS_OWNERLIST_EMPTY_DONTKNOW	= 0;
+integer IS_OWNERLIST_EMPTY_YES = 1;
+integer IS_OWNERLIST_EMPTY_NO = 2;
+integer g_IsOwnerListEmpty = IS_OWNERLIST_EMPTY_DONTKNOW;
 
 //OpenCollar MESSAGE MAP
 // messages for authenticating users
@@ -597,10 +606,20 @@ ResetOwnership()
 
 ApplyOwnership()
 {
+	integer defer = FALSE;		// defer ownership remove information until we know what we should do
+	
 	// first remove ownerships
 	if ((g_GameWearerPreviousAuthLevel == COMMAND_OWNER) && (g_GameWearerAuthLevel != COMMAND_OWNER))
 	{
-		RemoveOwner(llKey2Name(g_keyWearer),TRUE);
+		if (g_IsOwnerListEmpty == IS_OWNERLIST_EMPTY_DONTKNOW)
+		{
+			// we need to know if we have to actually remove ourselves from the list
+			defer = TRUE;
+		}
+		else if (g_IsOwnerListEmpty == IS_OWNERLIST_EMPTY_NO)
+		{
+			RemoveOwner(llKey2Name(g_keyWearer),TRUE);
+		}
 	}
 	if ((g_GameWearerPreviousAuthLevel == COMMAND_SECOWNER) && (g_GameWearerAuthLevel != COMMAND_SECOWNER))
 	{
@@ -618,7 +637,10 @@ ApplyOwnership()
 	// and add new ownerships
 	if ((g_GameWearerAuthLevel == COMMAND_OWNER) && (g_GameWearerPreviousAuthLevel != COMMAND_OWNER))
 	{
-		AddOwner(llKey2Name(g_keyWearer),TRUE);
+		if (g_IsOwnerListEmpty == IS_OWNERLIST_EMPTY_NO)
+		{
+			AddOwner(llKey2Name(g_keyWearer),TRUE);
+		}
 	}
 	if ((g_GameWearerAuthLevel == COMMAND_SECOWNER) && (g_GameWearerPreviousAuthLevel != COMMAND_SECOWNER))
 	{
@@ -631,6 +653,12 @@ ApplyOwnership()
 	if ((g_GamePartnerAuthLevel == COMMAND_SECOWNER) && (g_GamePartnerPreviousAuthLevel != COMMAND_SECOWNER))
 	{
 		AddOwner(g_PartnerName,FALSE);
+	}
+	
+	if (defer)
+	{
+		llSleep(10);
+		llMessageLinked(LINK_SET,COMMAND_NOAUTH,g_MessagesID+"|"+g_LabelDeferredDetect,g_keyWearer);
 	}
 }	
 
@@ -1161,6 +1189,7 @@ default
 				{
 					g_WearerAuthLevel = num;
 					g_GameState = STATE_FIRSTDRAW;
+					g_IsOwnerListEmpty = IS_OWNERLIST_EMPTY_DONTKNOW;
 					AskForDraw();
 				}
 				else if ((command == g_LabelCard) && (g_OtherCard == -1) && (id == g_PartnerKey))
@@ -1168,10 +1197,6 @@ default
 					g_OtherCard = llList2Integer(args,2);
 					g_OtherColor = llList2Integer(args,3);
 					
-					if ((g_GameState == STATE_SLAVE) || (g_GameState == STATE_FREESLAVE))
-					{
-						llOwnerSay(g_PartnerName + " drew a card");
-					}
 					ProcessCard();
 				}
 				else if ((command == g_LabelDraw) && (g_GameState >= STATE_FIRSTDRAW) &&
@@ -1189,6 +1214,19 @@ default
 					{
 						// no card to draw... spawn menu instead
 						DoMenu(g_keyWearer);
+					}
+				}
+				else if ((command == g_LabelDeferredDetect) && (id == g_keyWearer))
+				{
+					if (num == COMMAND_OWNER)
+					{
+						// we are still owner even when the partner has been added to the list. This means we are also on the owner list
+						g_IsOwnerListEmpty = IS_OWNERLIST_EMPTY_NO;
+						RemoveOwner(llKey2Name(g_keyWearer),TRUE);
+					}
+					else
+					{
+						g_IsOwnerListEmpty = IS_OWNERLIST_EMPTY_YES;
 					}
 				}
 				else if ((command == g_LabelEscape) && (id == g_PartnerKey))

@@ -73,7 +73,7 @@ list g_lstButtons;
 
 // labels
 string g_LabelHelp = "Help";
-string g_LabelGetHUD = "Get HUD"
+string g_LabelGetHUD = "Get HUD";
 string g_LabelEnablePrimary = "Primary";
 string g_LabelEnableSecondary = "Secondary";
 string g_LabelDisable = "Disable";
@@ -124,7 +124,7 @@ list g_ScanMenuIDs;
 string g_SettingsToken = "jm_cardgame";
 
 // separator character in database entry values
-string d_SettingsSeparator = "|";
+string g_SettingsSeparator = "|";
 
 // internal messages id
 string g_MessagesID = "jm_cardgame";
@@ -207,7 +207,7 @@ string UPMENU = "^";//when your menu hears this, give the parent menu
 Debug(string szMsg)
 {
 	if (!g_nDebugMode) return;
-	llOwnerSay(llGetScriptName() + ": " + szMsg);
+	llInstantMessage(g_keyWearer,llGetScriptName() + ": " + szMsg);
 }
 
 //===============================================================================
@@ -221,17 +221,10 @@ Debug(string szMsg)
 
 Notify(key id, string msg, integer alsoNotifyWearer)
 {
-	if (id == g_keyWearer)
+	llInstantMessage(id,msg);
+	if (alsoNotifyWearer)
 	{
 		llOwnerSay(msg);
-	}
-	else
-	{
-		llInstantMessage(id,msg);
-		if (alsoNotifyWearer)
-		{
-			llOwnerSay(msg);
-		}
 	}
 }
 
@@ -754,7 +747,7 @@ SendSettings(integer local)
 
 	if (local)
 	{
-		requestType = LOCALSETTINGS_SAVE;
+		requestType = LOCALSETTING_SAVE;
 	}
 	else
 	{
@@ -762,7 +755,7 @@ SendSettings(integer local)
 	}
 	
 	llMessageLinked(LINK_SET, requestType,g_SettingsToken+"="+
-		llDumpList2String(settings,d_SettingsSeparator), NULL_KEY);	
+		llDumpList2String(settings,g_SettingsSeparator), NULL_KEY);	
 }	
 
 //===============================================================================
@@ -825,7 +818,7 @@ ShowCard(integer myCard, integer color, integer value)
 
 AskForDraw()
 {
-	llOwnerSay("Click on one of the cards to draw");
+	Notify(g_keyWearer,"Click on one of the cards to draw",FALSE);
 	ClearCards();
 }
 
@@ -841,7 +834,7 @@ AskForDraw()
 
 ProcessCancelRequest()
 {
-	llOwnerSay("Cancelling game");
+	Notify(g_keyWearer,"Cancelling game",FALSE);
 	
 	if (g_PartnerChannel!= 0)
 	{
@@ -911,19 +904,19 @@ ProcessCard()
 	{
 		if (g_MyCard > g_OtherCard)
 		{
-			llOwnerSay("You are now owner!");
+			Notify(g_keyWearer,"You are now owner!",FALSE);
 			g_GameState = STATE_OWNER;
 			SetOwnership(TRUE,TRUE);
 		}
 		else if (g_MyCard < g_OtherCard)
 		{
-			llOwnerSay("You are now slave!");
+			Notify(g_keyWearer,"You are now slave!",FALSE);
 			g_GameState = STATE_SLAVE;
 			SetOwnership(FALSE,TRUE);
 		}
 		else
 		{
-			llOwnerSay("Need to draw again!");
+			Notify(g_keyWearer,"Need to draw again!",FALSE);
 			llSleep(5);
 			AskForDraw();
 		}
@@ -932,12 +925,12 @@ ProcessCard()
 	{
 		if (g_MyCard < g_OtherCard)
 		{
-			llOwnerSay("You lost! " +g_PartnerName + " can escape!");
+			Notify(g_keyWearer,"You lost! " +g_PartnerName + " can escape!",FALSE);
 			g_GameState = STATE_OWNERLOOSING;
 		}
 		else
 		{
-			llOwnerSay("You remain owner");
+			Notify(g_keyWearer,"You remain owner",FALSE);
 		}
 	}
 	else if ((g_GameState == STATE_SLAVE) || (g_GameState == STATE_FREESLAVE))
@@ -953,7 +946,8 @@ default
 {
 	state_entry()
 	{
-		llListen(nGetOwnerChannel(wearer, COLLAR_CHANNEL_OFFSET), "", NULL_KEY ,"");
+		llListen(nGetOwnerChannel(llGetOwner(), COLLAR_CHANNEL_OFFSET), "", NULL_KEY ,"");
+		llOwnerSay("listening on " + (string)nGetOwnerChannel(llGetOwner(), COLLAR_CHANNEL_OFFSET));
 	}
 
 	// reset the script on rezzing, data should be received than from httpdb.
@@ -1059,7 +1053,7 @@ default
 				{
 					if (g_PartnerKey != NULL_KEY)
 					{
-						llOwnerSay(g_PartnerName+" stopped the game");
+						Notify(g_keyWearer,g_PartnerName+" stopped the game",FALSE);
 					}
 					
 					ProcessCancelRequest();
@@ -1103,7 +1097,7 @@ default
 							g_SettingPrimary=FALSE;
 						}
 						g_GameState = STATE_OFF;
-						llOwnerSay("Game enabled");
+						Notify(g_keyWearer,"Game enabled",FALSE);
 						
 						if (id == g_keyWearer)
 						{
@@ -1126,7 +1120,8 @@ default
 						
 						if (g_GamePrimary && !g_SettingPrimaryAllowed)
 						{
-							llOwnerSay(g_PartnerName + " asked to play a game, but your owner forbid playing with primary ownership. Please try again with secondary ownership.");
+							Notify(g_keyWearer,g_PartnerName + " asked to play a game, but your owner forbid playing with primary ownership. Please try again with secondary ownership.",
+								FALSE);
 							llSay(g_PartnerChannel,g_MessagesID + "|" + g_LabelAnswer + "|no");
 						}
 						else
@@ -1144,7 +1139,7 @@ default
 				{
 					if (llList2String(args,2) == "yes")
 					{
-						llOwnerSay(g_PartnerName+" accepted to play");
+						Notify(g_keyWearer,g_PartnerName+" accepted to play",FALSE);
 						g_PartnerAuthLevel = num;
 						llMessageLinked(LINK_SET,COMMAND_EVERYONE,g_MessagesID+"|start",g_keyWearer);
 							// we add this step to record the authorization level of the wearer
@@ -1152,7 +1147,7 @@ default
 					}
 					else if (llList2String(args,2) == "no")
 					{
-						llOwnerSay(g_PartnerName+" refused to play");
+						Notify(g_keyWearer,g_PartnerName+" refused to play",FALSE);
 						g_GameState = STATE_OFF;
 					}
 				}
@@ -1197,11 +1192,11 @@ default
 				{
 					if (g_GameState == STATE_OWNER)
 					{
-						llOwnerSay(g_PartnerName + " tried to escape but failed");
+						Notify(g_keyWearer,g_PartnerName + " tried to escape but failed",FALSE);
 					}
 					else if (g_GameState == STATE_OWNERLOOSING)
 					{
-						llOwnerSay(g_PartnerName + " managed to escape and owns you now");
+						Notify(g_keyWearer,g_PartnerName + " managed to escape and owns you now",FALSE);
 						g_GameState = STATE_SLAVE;
 						SetOwnership(FALSE,FALSE);
 					}
@@ -1264,7 +1259,8 @@ default
 						}
 						if (message == g_LabelPlay)
 						{
-							llOwnerSay("Detecting other players. If your partner doesn't appear in the list, ask him/her to come closer, and to check that the game is active in his/her collar.");
+							Notify(g_keyWearer,"Detecting other players. If your partner doesn't appear in the list, ask him/her to come closer, and to check that the game is active in his/her collar.",
+								FALSE);
 							
 							// start scanning
 							g_GameState = STATE_DETECT;
@@ -1273,7 +1269,7 @@ default
 						}
 						if (message == g_LabelDisable)
 						{
-							llOwnerSay("Game disabled");
+							Notify(g_keyWearer,"Game disabled",FALSE);
 							g_GameState = STATE_DISABLED;
 						}
 					}
@@ -1286,7 +1282,7 @@ default
 							g_PartnerKey = llList2Key(g_ScanMenuIDs,partnerNum);
 							g_PartnerName = message;
 							g_PartnerChannel = nGetOwnerChannel(g_PartnerKey, COLLAR_CHANNEL_OFFSET);
-							llOwnerSay("Asking " + message + " for a game");
+							Notify(g_keyWearer,"Asking " + message + " for a game",FALSE);
 							
 							llSay(g_PartnerChannel,g_MessagesID+"|"+g_LabelAsk+
 								"|"+(string)g_SettingPrimary+
@@ -1324,15 +1320,15 @@ default
 						llSay(g_PartnerChannel,g_MessagesID+"|"+g_LabelEscape);
 						if (g_GameState == STATE_FREESLAVE)
 						{
-							llOwnerSay("You managed to escape and are now owning " +
-								g_PartnerName);
+							Notify(g_keyWearer,"You managed to escape and are now owning " +
+								g_PartnerName,FALSE);
 							g_GameState = STATE_OWNER;
 							ShowCard(FALSE,g_OtherColor,g_OtherCard);
 							SetOwnership(TRUE,FALSE);
 						}
 						else if (g_GameState == STATE_SLAVE)
 						{
-							llOwnerSay("Your escape attempt failed");
+							Notify(g_keyWearer,"Your escape attempt failed",FALSE);
 						}
 					}
 				}
@@ -1367,7 +1363,7 @@ default
 					}
 					else
 					{
-						llOwnerSay("Your owner didn't allow you to play as primary owner");
+						Notify(g_keyWearer,"Your owner didn't allow you to play as primary owner",FALSE);
 					}
 				}
 				else if (optionNum == 1)
@@ -1413,7 +1409,7 @@ default
 	
 	// if nobody is within 10 meters, say so.
 	no_sensor() {
-		llOwnerSay("No players found...");
+		Notify(g_keyWearer,"No players found...",FALSE);
 		DoMenu(g_keyWearer);
 	}
 	
@@ -1427,5 +1423,6 @@ default
 		}
 	}
 }
+
 
 
