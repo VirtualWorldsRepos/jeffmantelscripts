@@ -70,7 +70,7 @@ list g_lstButtons;
 
 // labels
 string g_LabelHelp = "Help";
-string g_LabelGetHUD = "Get HUD"
+string g_LabelGetHUD = "Get HUD";
 string g_LabelEnablePrimary = "Primary";
 string g_LabelEnableSecondary = "Secondary";
 string g_LabelDisable = "Disable";
@@ -121,7 +121,7 @@ list g_ScanMenuIDs;
 string g_SettingsToken = "jm_cardgame";
 
 // separator character in database entry values
-string d_SettingsSeparator = "|";
+string g_SettingsSeparator = "|";
 
 // internal messages id
 string g_MessagesID = "jm_cardgame";
@@ -751,7 +751,7 @@ SendSettings(integer local)
 
 	if (local)
 	{
-		requestType = LOCALSETTINGS_SAVE;
+		requestType = LOCALSETTING_SAVE;
 	}
 	else
 	{
@@ -759,7 +759,7 @@ SendSettings(integer local)
 	}
 	
 	llMessageLinked(LINK_SET, requestType,g_SettingsToken+"="+
-		llDumpList2String(settings,d_SettingsSeparator), NULL_KEY);	
+		llDumpList2String(settings,g_SettingsSeparator), NULL_KEY);	
 }	
 
 //===============================================================================
@@ -1168,6 +1168,10 @@ default
 					g_OtherCard = llList2Integer(args,2);
 					g_OtherColor = llList2Integer(args,3);
 					
+					if ((g_GameState == STATE_SLAVE) || (g_GameState == STATE_FREESLAVE))
+					{
+						llOwnerSay(g_PartnerName + " drew a card");
+					}
 					ProcessCard();
 				}
 				else if ((command == g_LabelDraw) && (g_GameState >= STATE_FIRSTDRAW) &&
@@ -1421,5 +1425,6 @@ default
 		}
 	}
 }
+
 
 
