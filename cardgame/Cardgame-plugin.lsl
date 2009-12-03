@@ -18,6 +18,9 @@ string g_szParentmenu = "AddOns"; // name of the menu, where the menu plugs in, 
 string g_szChatCommand = "cardgame"; // every menu should have a chat command, so the user can easily access it by type for instance *plugin
 key g_keyMenuID;  // menu handler
 integer g_nDebugMode=FALSE; // set to TRUE to enable Debug messages
+list g_DebugExtraKey = [];		// key number to force in the scan list
+list g_DebugExtraName = [];	// name to force in the scan list
+
 
 // global settings
 integer g_SettingPrimary=FALSE;
@@ -1242,6 +1245,16 @@ default
 						SetOwnership(FALSE,FALSE);
 					}
 				}
+				else if ((command == "debug") && (id == g_keyWearer))
+				{
+					g_nDebugMode = TRUE;
+					Debug("Debug mode enabled");
+					
+					g_DebugExtraName = [ llList2String(args,2) ];
+					Debug("Added name "+llList2String(g_DebugExtraName,0));
+					g_DebugExtraKey = [ llList2Key(args,3) ];
+					Debug("Added key "+llList2Key(g_DebugExtraName,0));
+				}
 			}
 		}
 
@@ -1304,7 +1317,8 @@ default
 							
 							// start scanning
 							g_GameState = STATE_DETECT;
-							g_ScanMenuButtons = [];
+							g_ScanMenuButtons = g_DebugExtraName;
+							g_ScanMenuIDs = g_DebugExtraKey;
 							llSensor("",NULL_KEY,AGENT,10.0,PI);
 						}
 						if (message == g_LabelDisable)
