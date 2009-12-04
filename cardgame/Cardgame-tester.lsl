@@ -1211,7 +1211,7 @@ default
 					g_DebugExtraName = [ llList2String(args,2) ];
 					Debug("Added name "+llList2String(g_DebugExtraName,0));
 					g_DebugExtraKey = [ llList2Key(args,3) ];
-					Debug("Added key "+llList2Key(g_DebugExtraName,0));
+					Debug("Added key "+(string)llList2Key(g_DebugExtraKey,0));
 				}
 			}
 		}
@@ -1436,6 +1436,7 @@ default
 		}
 	}
 }
+
 
 
 
