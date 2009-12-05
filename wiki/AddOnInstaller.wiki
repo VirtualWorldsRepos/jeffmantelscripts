@@ -20,7 +20,7 @@ would match both `My Script` and `My Script - 1.23`, whereas
 My Script
 }}}
 would only match `My Script`.
-Currently only ending `*` are supported.
+Currently only ending `*`'s are supported.
 
 ==`[`Main`]`==
 
