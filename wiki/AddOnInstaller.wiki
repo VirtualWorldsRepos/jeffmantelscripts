@@ -21,6 +21,7 @@ My Script
 }}}
 would only match `My Script`.
 Currently only ending `*`'s are supported.
+`|` is a special character used by the installer and should never be used in the notecard.
 
 ==`[`Main`]`==
 
