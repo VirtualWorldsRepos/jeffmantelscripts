@@ -52,7 +52,7 @@ This optional category describes additional steps that must be followed by the i
   * `item`: the value is the name of an item that must be removed from the collar. This can be used if an older version of the add-on had more items than the new one, and you need to remove an item that isn't in the `[Install]` category, or to delete an item that could have been generated through the normal use of the add-on. The value can end with a `*` to match multiple items.
   * `httpdb`: the value is the name of an entry that must be removed from the http database after everything has been removed from the collar. Use it to remove settings that were used by the add-on
   * `localsetting`: same thing with local settings
-  * `script`: the value is the name of a script that will be uploaded and started in the collar after everything has been removed from the collar. The script can perform additional clean up, and should delete itself at the end.
+  * `script`: the value is the name of a script that will be uploaded and started in the collar after everything has been removed from the collar. The script can perform additional clean up, and should send a message before delete itself. Only one script can be specified.
 
 ==`[`!UpgradeCleanUp`]`==
 
