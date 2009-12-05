@@ -1,0 +1,46 @@
+#summary System used to manage an add-on in an OpenCollar
+= Introduction =
+
+This system simplifies management of add-ons in an !OpenCollar. It lets the user easily install, remove or update cleanly an add-on in his/her collar. This system works similarly to the !OpenCollar in-place updater, with a few modifications. It can be configured by the author using a Notecard.
+
+= Notecard format =
+
+The notecard must start with the name "!InstallerConfig". It can be followed by any text, such as the add-on name and a version number.
+Any line starting with a # will be ignored and can be used to add comments to the notecard.
+Any line starting with a `[` and ending with a `]` will be read as a category title. The following lines will be read as part of this category, until the next category title.
+The first non-empty line that isn't a comment must be a category title.
+The category titles can be placed in any order.
+The following paragraphs describes each category.
+In several categories, each line describes an item, either in the collar or in the installer. If the line starts ends with a `*`, then every item whose name _starts_ with what precedes the `*` will be matched. If the line doesn't end with a `*`, then only the item whose name is exactly the line will be matched. As an example
+{{{
+My Script*
+}}}
+would match both `My Script` and `My Script - 1.23`, whereas
+{{{
+My Script
+}}}
+would only match `My Script`.
+Currently only ending `*` are supported.
+
+==`[`Main`]`==
+
+This category contains general information about the add-on. All the following lines must follow the `key=value` pattern. The following keys are recognized:
+  * `Name`: add-on name
+  * `Author`: add-on author name
+  * `Version`: version number
+  * `Help`: name of a notecard that can be given to the wearer when touching the installer, or when clicking on the "help" button before the installation process (optional)
+
+==`[`Detection`]`==
+
+Each line is the name of an item that the installer can look for into the collar. If _all_ the items are found, then the installer knows that the add-on (or a previous version) is installed, and will propose the "upgrade" button instead of "install". Only put in there the minimal list of what would necessary to detect the add-on. As an example just the script name could be enough.
+
+==`[`Install`]`==
+
+Each line in that category give the name of an item to copy to the collar when installing or upgrading, or to delete when removing. If the item is a script, it will be started in the collar at the end of installation. If you have a script with a version number, it is important to use a `*` in the name instead of the version number. If for example an old version of the add-on had a script called `MyScript - 1.0` and the new version has a script called `MyScript - 1.1`, you must have a
+{{{
+MyScript - *
+}}}
+line in the notecard. This way:
+  * when installing, the script `MyScript - 1.1` will be copied into the collar
+  * when upgrading, either `MyScript - 1.0` or `MyScript - 1.1` will be renoved and replaced my `MyScript - 1.1`
+  * when removing, either `MyScript - 1.0` or `MyScript - 1.1` will be removed.
