@@ -1,7 +1,7 @@
 #summary System used to manage an add-on in an OpenCollar
 = Introduction =
 
-This system simplifies management of add-ons in an !OpenCollar. It lets the user easily install, remove or update cleanly an add-on in his/her collar. This system works similarly to the !OpenCollar in-place updater, with a few modifications. It can be configured by the author using a Notecard.
+This system simplifies management of add-ons in an [http://code.google.com/p/opencollar/ OpenCollar]. It lets the user easily install, remove or update cleanly an add-on in his/her collar. This system works similarly to the !OpenCollar in-place updater, with a few modifications. It can be configured by the author using a Notecard.
 
 = Notecard format =
 
