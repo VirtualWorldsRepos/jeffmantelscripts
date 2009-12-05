@@ -44,3 +44,45 @@ line in the notecard. This way:
   * when installing, the script `MyScript - 1.1` will be copied into the collar
   * when upgrading, either `MyScript - 1.0` or `MyScript - 1.1` will be renoved and replaced my `MyScript - 1.1`
   * when removing, either `MyScript - 1.0` or `MyScript - 1.1` will be removed.
+
+==`[`!RemoveCleanUp`]`==
+
+This optional category describes additional steps that must be followed by the installer when removing the add-on, after having deleted all the items listed in `[Install]`. Each line follows a `key=value` pattern. The following keys are supported:
+  * `item`: the value is the name of an item that must be removed from the collar. This can be used if an older version of the add-on had more items than the new one, and you need to remove an item that isn't in the `[Install]` category, or to delete an item that could have been generated through the normal use of the add-on. The value can end with a `*` to match multiple items.
+  * `httpdb`: the value is the name of an entry that must be removed from the http database after everything has been removed from the collar. Use it to remove settings that were used by the add-on
+  * `localsettings`: same thing with local settings
+  * `script`: the value is the name of a script that will be uploaded and started in the collar after everything has been removed from the collar. The script can perform additional clean up, and should delete itself at the end.
+
+==`[`!UpgradeCleanUp`]`==
+
+The contents use the same definition than `[RemoveCleanUp]`, but is used when upgrading the system, after having deleted all the items listed in `[Install]` and before installing them.
+
+=Example Notecard=
+
+{{{
+# example notecard for the add-on installer
+
+[Main]
+Name=Test add-on
+Author=Jeff Mantel
+Version=1.1
+Help=TestAddOn - Help
+
+[Detection]
+# this script is in every version of the add-on
+JMTestAddOn - plugin - *
+
+[Install]
+# plugin script
+JMTestAddOn - plugin - *
+
+# configuration notecard (no version name)
+JMTestAddOn - config
+
+# HUD for the plugin
+JMTestAddOn - HUD - *
+
+[RemoveCleanUp]
+# database setting
+httpdb=JMTestAddOn
+}}}
