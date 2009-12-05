@@ -67,6 +67,8 @@ The contents use the same definition than `[RemoveCleanUp]`, but is used when up
 Name=Test add-on
 Author=Jeff Mantel
 Version=1.1
+
+# Help notecard
 Help=TestAddOn - Help
 
 [Detection]
