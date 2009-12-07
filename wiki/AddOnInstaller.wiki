@@ -30,6 +30,7 @@ This category contains general information about the add-on. All the following l
   * `Author`: add-on author name
   * `Version`: version number
   * `Help`: name of a notecard that can be given to the wearer when touching the installer, or when clicking on the "help" button before the installation process (optional)
+  * `MinCollarVersion`: minimal version number of the collar necessary to use the installer. The installer itself needs an OpenCollar 3.4 or higher, so this parameter will be ignored if it is less than 3.4 (optional)
 
 ==`[`Detection`]`==
 
