@@ -1,0 +1,23 @@
+$module ()
+
+// Common definitions between installer and uploaded collar script
+// $URL$
+// $Date$
+// $Revision$
+
+string Header = "JMAddOnInstaller";
+
+// from installer to collar script
+string CommandDelete = "delete";
+string CommandWaitFor = "wait for";
+string CommandRemoveHttpdb = "remove httpdb";
+string CommandRemoveLocalSettings = "remove localsettings";
+
+// from collar script to installer
+string Start = "start";
+string StartInstall = "install";
+string StartUpgrade = "upgrade";
+string StartRemove = "remove";
+string Done = "done";
+
+
