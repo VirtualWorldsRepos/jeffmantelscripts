@@ -1,5 +1,5 @@
-// Card game plugin for Opencollar
-// $URL: https://jeffmantelscripts.googlecode.com/svn/trunk/cardgame/Cardgame-plugin.lsl $
+// Add-On installer for Opencollar
+// $URL$
 // $Date$
 // $Revision$
 
@@ -47,6 +47,10 @@ integer g_DoubleCheckChannel=-0x10CC011A; // channel for finding multiple update
 integer g_InstallerAlone;
 integer g_UpdatePin;
 key g_CollarKey;
+
+// Common definitions between installer and uploaded collar script
+
+$import messages.lslm() g_Messages;
 
 //===============================================================================
 //= parameters :	string	pattern		pattern to match
@@ -526,6 +530,13 @@ state start_update
 					SendItem(g_InstallerScript, TRUE);
 					
 					llSetText("Waiting for owner to choose action...",<1,1,0>,1);
+				}
+				else if (command0 == g_MessagesHeader)
+				{
+					if (command1 == g_MessagesStart)
+					{
+						string mode = llList2String(temp,2);
+					}
 				}
 			}
 		}
