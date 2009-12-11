@@ -1,0 +1,46 @@
+// Utility functions for Add-On installer
+// $URL$
+// $Date$
+// $Revision$
+
+$module ()
+
+//===============================================================================
+//= parameters :	string	pattern		pattern to match
+//=
+//= return :		list				0: item type, or -1 of item doesn't exist
+//=										1: item name
+//=
+//= description :	looks for an item in the local inventory
+//=
+//===============================================================================
+
+list FindItem(string pattern)
+{
+	integer type = INVENTORY_NONE;
+	string foundName;
+	
+	if (llGetSubString(pattern,-1,-1) == "*")
+	{
+		string nameStart = llGetSubString(pattern,0,-2);
+		integer nameStartSize = llStringLength(nameStart)-1;
+		integer numOfItems = llGetInventoryNumber(INVENTORY_ALL);
+		integer i;
+		
+		for(i=0; i<numOfItems; i++)
+		{
+			if (llGetSubString(llGetInventoryName(INVENTORY_ALL,i),0,nameStartSize))
+			{
+				foundName = llGetInventoryName(INVENTORY_ALL,i);
+			}
+		}
+	}
+	else
+	{
+		foundName = pattern;
+	}
+	type = llGetInventoryType(foundName);
+	
+	return [type, foundName];
+}
+

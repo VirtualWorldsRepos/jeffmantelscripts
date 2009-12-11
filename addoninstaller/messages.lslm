@@ -5,19 +5,42 @@ $module ()
 // $Date$
 // $Revision$
 
-string Header = "JMAddOnInstaller";
+// communication channel definitions
+integer g_UpdateChannel = -7483214;
+string g_MessagesHeader = "JMAddOnInstaller";
 
 // from installer to collar script
-string CommandDelete = "delete";
-string CommandWaitFor = "wait for";
-string CommandRemoveHttpdb = "remove httpdb";
-string CommandRemoveLocalSettings = "remove localsettings";
+
+string g_MessagesAskOwner = "ask";
+	// param 1: add-on name, param 2-n: detect items
+string g_MessagesCommandDelete = "delete";
+	// param 1-n: tiems to delete
+string g_MessagesCommandWaitFor = "wait for";
+	// param 1: item to wait for
+string g_MessagesCommandStartScripts = "start scripts";
+	// no params
+string g_MessagesCommandRemoveHttpdb = "remove httpdb";
+	// param 1-n: tokens to remove
+string g_MessagesCommandRemoveLocalSettings = "remove localsettings";
+	// param 1-n: tokens to remove
+string g_MessagesEnd = "end";
+	// no params
+string g_MessagesScript = "script";
+	// no params. sent by clean-up script
+
 
 // from collar script to installer
-string Start = "start";
-string StartInstall = "install";
-string StartUpgrade = "upgrade";
-string StartRemove = "remove";
-string Done = "done";
+string g_MessagesLoaded = "loaded";
+	// no params
+string g_MessagesStart = "start";
+	// param 1: operation type (int, see definitions below)
+string g_MessagesDone = "done";
+	// param 1: executed command name
+
+// types of operation
+integer OPERATION_INSTALL = 0;
+integer OPERATION_UPGRADE = 1;
+integer OPERATION_REMOVE = 2;
+
 
 

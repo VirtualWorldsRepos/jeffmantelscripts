@@ -42,54 +42,30 @@ integer CAT_UPDATECLUP = 5;
 integer g_NotecardCategory = CAT_NONE;
 
 // collar update procedure variables and constants
-integer g_UpdateChannel = -7483214;
 integer g_DoubleCheckChannel=-0x10CC011A; // channel for finding multiple updaters
 integer g_InstallerAlone;
 integer g_UpdatePin;
 key g_CollarKey;
+string g_LastSentCommand;
+integer g_OperationType;	// install, remove or upgrade
+
+// installation steps
+integer STEP_START = 0;
+integer STEP_REMOVEITEMS = 1;
+integer STEP_REMOVEHTTPDB = 2;
+integer STEP_REMOVELOCAL = 3;
+integer STEP_CLEANUPSCRIPT = 4;
+integer STEP_INSTALLITEM = 5;
+integer STEP_STARTSCRIPTS = 6;
+integer STEP_END = 7;
+integer g_CurrentStep;
+integer g_NextItemToInstall;
 
 // Common definitions between installer and uploaded collar script
+$import messages.lslm();
 
-$import messages.lslm() g_Messages;
-
-//===============================================================================
-//= parameters :	string	pattern		pattern to match
-//=
-//= return :		list				0: item type, or -1 of item doesn't exist
-//=										1: item name
-//=
-//= description :	looks for an item in the local inventory
-//=
-//===============================================================================
-list FindItem(string pattern)
-{
-	integer type = INVENTORY_NONE;
-	string foundName;
-	
-	if (llGetSubString(pattern,-1,-1) == "*")
-	{
-		string nameStart = llGetSubString(pattern,0,-2);
-		integer nameStartSize = llStringLength(nameStart)-1;
-		integer numOfItems = llGetInventoryNumber(INVENTORY_ALL);
-		integer i;
-		
-		for(i=0; i<numOfItems; i++)
-		{
-			if (llGetSubString(llGetInventoryName(INVENTORY_ALL,i),0,nameStartSize))
-			{
-				foundName = llGetInventoryName(INVENTORY_ALL,i);
-			}
-		}
-	}
-	else
-	{
-		foundName = pattern;
-	}
-	type = llGetInventoryType(foundName);
-	
-	return [type, foundName];
-}
-
+// utility functions
+$import utils.lslm();
 
 //===============================================================================
 //= parameters :	string	origlist	original string
@@ -106,6 +82,10 @@ string AddItem2List(string origlist, string item)
 	if (origlist == "")
 	{
 		return item;
+	}
+	else if (item == "")
+	{
+		return origlist;
 	}
 	else
 	{
@@ -159,13 +139,13 @@ UnRunScripts()
 //= parameters :	string	name			Name of the item to send
 //=					integer	executeScript	If TRUE and if item is a script, execute it after transfer
 //=
-//= return :		none
+//= return :		string	actual name of the item sent, or "" if not found
 //=
 //= description :	sends an item to collar
 //=
 //===============================================================================
 
-SendItem(string name, integer executeScript)
+string SendItem(string name, integer executeScript)
 {
 	list itemDetails = FindItem(name);
 	integer itemType = llList2Integer(itemDetails,0);
@@ -174,6 +154,7 @@ SendItem(string name, integer executeScript)
 	if (itemType == INVENTORY_NONE)
 	{
 		llOwnerSay("Error: item " + name + " not found");
+		itemRealName = "";
 	}
 	else if (itemType == INVENTORY_SCRIPT)
 	{
@@ -182,6 +163,181 @@ SendItem(string name, integer executeScript)
 	else
 	{
 		llGiveInventory(g_CollarKey,itemRealName);
+	}
+	
+	return itemRealName;
+}
+
+
+//===============================================================================
+//= parameters :	string	command			Command name
+//=					string	params			Parameters
+//=
+//= return :		none
+//=
+//= description :	send a command to the collar
+//=
+//===============================================================================
+
+SendCommand(string command, string params)
+{
+	g_LastSentCommand = command;
+	llSay(g_UpdateChannel,g_MessagesHeader + "|" + AddItem2List(command,params));
+}
+
+
+//===============================================================================
+//= parameters :	none
+//=
+//= return :		none
+//=
+//= description :	performs next step of the operation, after having rereived acknowledge from collar
+//=
+//===============================================================================
+
+NextStep()
+{
+	if (g_CurrentStep == STEP_START)
+	{
+		g_CurrentStep = STEP_REMOVEITEMS;
+		llSetText("Removing items",<1,1,0>,1);
+		
+		string itemsToRemove;
+		
+		itemsToRemove = llDumpList2String(g_InstallItems,"|");
+		
+		if (g_OperationType == OPERATION_UPGRADE)
+		{
+			itemsToRemove = AddItem2List(itemsToRemove,g_UpdateCleanUpItems);
+		}
+		else if (g_OperationType == OPERATION_REMOVE)
+		{
+			itemsToRemove = AddItem2List(itemsToRemove,g_RemoveCleanUpItems);
+		}
+		
+		if (itemsToRemove != "")
+		{
+			SendCommand(g_MessagesCommandDelete,itemsToRemove);
+			return;
+		}
+	}
+	
+	if (g_CurrentStep == STEP_REMOVEITEMS)
+	{
+		g_CurrentStep = STEP_REMOVEHTTPDB;
+		llSetText("Cleaning database settings",<1,1,0>,1);
+		
+		string httpdbTokens="";
+		
+		if (g_OperationType == OPERATION_UPGRADE)
+		{
+			httpdbTokens = g_UpdateCleanUpHttpdb;
+		}
+		else if (g_OperationType == OPERATION_REMOVE)
+		{
+			httpdbTokens = g_RemoveCleanUpHttpdb;
+		}
+		
+		if (httpdbTokens != "")
+		{
+			SendCommand(g_MessagesCommandRemoveHttpdb,httpdbTokens);
+			return;
+		}
+	}
+
+	if (g_CurrentStep == STEP_REMOVEHTTPDB)
+	{
+		g_CurrentStep = STEP_REMOVELOCAL;
+		llSetText("Cleaning local settings",<1,1,0>,1);
+		
+		string localTokens="";
+		
+		if (g_OperationType == OPERATION_UPGRADE)
+		{
+			localTokens = g_UpdateCleanUpLocal;
+		}
+		else if (g_OperationType == OPERATION_REMOVE)
+		{
+			localTokens = g_RemoveCleanUpLocal;
+		}
+		
+		if (localTokens != "")
+		{
+			SendCommand(g_MessagesCommandRemoveLocalSettings,localTokens);
+			return;
+		}
+	}
+	
+	if (g_CurrentStep == STEP_REMOVELOCAL)
+	{
+		g_CurrentStep = STEP_CLEANUPSCRIPT;
+		llSetText("Calling clean up script",<1,1,0>,1);
+		
+		string scriptName="";
+		
+		if (g_OperationType == OPERATION_UPGRADE)
+		{
+			scriptName = g_UpdateCleanUpScript;
+		}
+		else if (g_OperationType == OPERATION_REMOVE)
+		{
+			scriptName = g_RemoveCleanUpScript;
+		}
+		
+		if (scriptName != "")
+		{
+			SendItem(scriptName,TRUE);
+			g_LastSentCommand = g_MessagesScript;
+			return;
+		}
+	}	
+	
+	if (g_CurrentStep == STEP_CLEANUPSCRIPT)
+	{
+		if (g_OperationType == OPERATION_REMOVE)
+		{
+			g_CurrentStep = STEP_END;
+		}
+		else
+		{
+			g_CurrentStep = STEP_INSTALLITEM;
+			g_NextItemToInstall = 0;
+		}
+	}
+	
+	if (g_CurrentStep == STEP_INSTALLITEM)
+	{
+		if (g_NextItemToInstall >= llGetListLength(g_InstallItems))
+		{
+			g_CurrentStep = STEP_STARTSCRIPTS;
+			llSetText("Starting scripts",<1,1,0>,1);
+			SendCommand(g_MessagesCommandStartScripts,"");
+			return;
+		}
+		else
+		{
+			string itemName = SendItem(llList2String(g_InstallItems,g_NextItemToInstall),FALSE);
+			g_NextItemToInstall += 1;
+			
+			if (itemName != "")
+			{
+				llSetText("Installing " + itemName,<1,1,0>,1);
+				SendCommand(g_MessagesCommandWaitFor,itemName);
+			}
+			
+			return;
+		}
+	}
+	
+	if (g_CurrentStep == STEP_STARTSCRIPTS)
+	{
+		g_CurrentStep = STEP_END;
+	}
+	
+	if (g_CurrentStep = STEP_END)
+	{
+		llSetText("Operation finished",<0,1,0>,1);
+		llOwnerSay("Operation finished. You can pick up the collar");
 	}
 }
 
@@ -524,18 +680,36 @@ state start_update
 				}
 				else if (command0 == "ready")
 				{
-					// Collar responed everything is ready, douplicate items were deleted so start to send stuff over
+					// Collar responed everything is ready, duplicate items were deleted so start to send stuff over
 					g_UpdatePin = (integer)command1;
 					g_CollarKey = id;
 					SendItem(g_InstallerScript, TRUE);
 					
 					llSetText("Waiting for owner to choose action...",<1,1,0>,1);
 				}
-				else if (command0 == g_MessagesHeader)
+				else if ((command0 == g_MessagesHeader) && id == g_CollarKey)
 				{
-					if (command1 == g_MessagesStart)
+					if (command1 == g_MessagesLoaded)
 					{
-						string mode = llList2String(temp,2);
+						// send information to collar script
+						SendCommand(g_MessagesAskOwner,AddItem2List(g_ConfigName,g_DetectionItems));
+					}
+					else if (command1 == g_MessagesStart)
+					{
+						g_OperationType = llList2Integer(temp,2);
+						g_CurrentStep = STEP_START;
+						NextStep();
+					}
+					else if (command1 == g_MessagesDone)
+					{
+						if (llList2String(temp,2) == g_LastSentCommand)
+						{
+							NextStep();
+						}
+						else
+						{
+							llOwnerSay("Error, bad acknowledge received...");
+						}
 					}
 				}
 			}
