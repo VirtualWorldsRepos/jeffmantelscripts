@@ -622,7 +622,7 @@ state start_update
 		{
 			message += " - version " + g_ConfigVersion;
 		}
-		message += "\nInstaller is ready. Rez your collar\nnext to me, touch it and select Help/Debug->Update";
+		message += "\nInstaller is ready. Rez your collar\nnext to me, touch it and select Help/Debug->Update.\nOr touch me for help";
 				
 		llSetText(message,<0,0,1>,1);
 		
