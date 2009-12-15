@@ -54,7 +54,7 @@ This optional category describes additional steps that must be followed by the i
   * `httpdb`: the value is the name of an entry that must be removed from the http database after everything has been removed from the collar. Use it to remove settings that were used by the add-on
   * `localsetting`: same thing with local settings
   * `script`: the value is the name of a script that will be uploaded and started in the collar after everything has been removed from the collar. The script can perform additional clean up, and should send a message before deleting itself. Only one script can be specified.
-The clean up script needs to send the string "JMAddOnInstaller|done|script" on channel -7483214 when finished. The installer will wait until it receives this message before continuing. You can use the CleanUpDone() from the example cleanup script.
+The clean up script needs to send the string "JMAddOnInstaller|done|script" on channel -7483214 when finished. The installer will wait until it receives this message before continuing. You can use the !CleanUpDone() function from the example cleanup script.
 
 ==`[`!UpgradeCleanUp`]`==
 
