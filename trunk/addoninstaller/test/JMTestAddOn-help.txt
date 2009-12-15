@@ -1,0 +1,22 @@
+This is a help notecard for the Opencollar add-on installer example.
+
+To use the installer:
+
+1) Go to a land where you can rez your own objects, with no autoreturn, or an autoreturn of more than 5 minutes
+2) rez the installer (you can't use someone else's installer, it needs to be your own) 
+3)   rez your collar next to the installer
+4) touch your collar
+5) go into the Help/Debug menu
+6) select "Update"
+7) from the menu, you can then install, update, or remove the add-on
+8) pick your collar and wear it.
+
+The collar will have a new name, so that you can differentiate it from the non updated collar. A letter is added to the name:
+- I if the add-on was installed
+- U if the add-on was upgraded
+- R if the add-on was removed
+You should rename the collar yourself to something more meaningfull once you get it back in your inventory.
+
+For more information about the installer, please go to:
+http://code.google.com/p/jeffmantelscripts/wiki/AddOnInstaller
+ 
