@@ -715,4 +715,26 @@ state start_update
 			}
 		}
 	}	
+
+	touch_start(integer num_detected)
+	{
+		if (llDetectedKey(0) != llGetOwner())
+		{
+			llInstantMessage(llDetectedKey(0),"Sorry, only the owner can use the installer");
+		}
+		else
+		{
+			list notecardDetails = FindItem(g_ConfigNotecard);
+			
+			if (llList2Integer(notecardDetails,0) == INVENTORY_NONE)
+			{
+				llOwnerSay("Help notecard not found");
+			}
+			else
+			{
+				llOwnerSay("Sending help notecard");
+				llGiveInventory(llGetOwner(),llList2String(notecardDetails,1));
+			}
+		}
+	}
 }
