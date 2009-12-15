@@ -53,40 +53,15 @@ This optional category describes additional steps that must be followed by the i
   * `item`: the value is the name of an item that must be removed from the collar. This can be used if an older version of the add-on had more items than the new one, and you need to remove an item that isn't in the `[Install]` category, or to delete an item that could have been generated through the normal use of the add-on. The value can end with a `*` to match multiple items.
   * `httpdb`: the value is the name of an entry that must be removed from the http database after everything has been removed from the collar. Use it to remove settings that were used by the add-on
   * `localsetting`: same thing with local settings
-  * `script`: the value is the name of a script that will be uploaded and started in the collar after everything has been removed from the collar. The script can perform additional clean up, and should send a message before delete itself. Only one script can be specified.
+  * `script`: the value is the name of a script that will be uploaded and started in the collar after everything has been removed from the collar. The script can perform additional clean up, and should send a message before deleting itself. Only one script can be specified.
+The clean up script needs to send the string "JMAddOnInstaller|done|script" on channel -7483214 when finished. The installer will wait until it receives this message before continuing. You can use the CleanUpDone() from the example cleanup script.
 
 ==`[`!UpgradeCleanUp`]`==
 
 The contents use the same definition than `[RemoveCleanUp]`, but is used when upgrading the system, after having deleted all the items listed in `[Install]` and before installing them.
 
-=Example Notecard=
+=Examples=
 
-{{{
-# example notecard for the add-on installer
-
-[Main]
-Name=Test add-on
-Author=Jeff Mantel
-Version=1.1
-
-# Help notecard
-Help=TestAddOn - Help
-
-[Detection]
-# this script is in every version of the add-on
-JMTestAddOn - plugin - *
-
-[Install]
-# plugin script
-JMTestAddOn - plugin - *
-
-# configuration notecard (no version name)
-JMTestAddOn - config
-
-# HUD for the plugin
-JMTestAddOn - HUD - *
-
-[RemoveCleanUp]
-# database setting
-httpdb=JMTestAddOn
-}}}
+Some examples can be found in subversion, in this folder: [http://code.google.com/p/jeffmantelscripts/source/browse/#svn/trunk/addoninstaller/test]. You will find:
+  * [http://code.google.com/p/jeffmantelscripts/source/browse/trunk/addoninstaller/test/InstallerConfig-JMTestAddOn.txt an example notecard]
+  * [http://code.google.com/p/jeffmantelscripts/source/browse/trunk/addoninstaller/test/JMTestAddOn-cleanscript.lslp an example clean up script]
