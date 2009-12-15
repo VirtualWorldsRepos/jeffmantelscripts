@@ -5,8 +5,8 @@
 
 //Licensed under the GPLv2, with the additional requirement that these scripts remain "full perms" in Second Life.  See "OpenCollar License" for details.
 
-// Common definitions between installer and uploaded collar script
-$import messages.lslm();
+// Communication channel between installer and uploaded collar script
+integer g_UpdateChannel = -7483214;
 
 
 //===============================================================================
