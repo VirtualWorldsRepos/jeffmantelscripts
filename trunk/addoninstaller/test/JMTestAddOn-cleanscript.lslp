@@ -1,7 +1,7 @@
 // Example clean up script for add-on installer
-// $URL: https://jeffmantelscripts.googlecode.com/svn/trunk/addoninstaller/JMAddOnInstaller-CollarScript.lslp $
-// $Date: 2009-12-14 15:46:59 +0100 (Mon, 14 Dec 2009) $
-// $Revision: 34 $
+// $URL$
+// $Date$
+// $Revision$
 
 //Licensed under the GPLv2, with the additional requirement that these scripts remain "full perms" in Second Life.  See "OpenCollar License" for details.
 
