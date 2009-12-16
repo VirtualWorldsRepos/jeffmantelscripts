@@ -30,14 +30,14 @@ JMTestAddOn - config
 # things to do when removing the add-on
 [RemoveCleanUp]
 ## database token to remove
-httpdb=JMTestAddOn
+Httpdb=JMTestAddOn
 
 
 # things to do when upgrading the add-on
 [UpgradeCleanUp]
 
 ## script that will be called when the old items are removed, and before the new items are installed
-script=JMTestAddOn - cleanscript - *
+Script=JMTestAddOn - clean script - *
 
 ## additional item to remove, if it is here
-item=removeme
+Item=removeme

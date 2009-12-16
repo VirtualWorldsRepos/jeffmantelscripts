@@ -29,7 +29,7 @@ list FindItem(string pattern)
 		
 		for(i=0; i<numOfItems; i++)
 		{
-			if (llGetSubString(llGetInventoryName(INVENTORY_ALL,i),0,nameStartSize))
+			if (llGetSubString(llGetInventoryName(INVENTORY_ALL,i),0,nameStartSize) == nameStart)
 			{
 				foundName = llGetInventoryName(INVENTORY_ALL,i);
 			}

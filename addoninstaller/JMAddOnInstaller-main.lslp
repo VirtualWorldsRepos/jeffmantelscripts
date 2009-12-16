@@ -7,7 +7,7 @@
 
 // internal setup
 string g_ConfigNotecard = "InstallerConfig*";
-string g_InstallerScript = "JMAddonInstaller - Collar Script*";
+string g_InstallerScript = "JMAddOnInstaller - collar script*";
 
 // configuration read from notecard
 string g_ConfigName;
@@ -354,6 +354,10 @@ default
 			g_ConfigNoteCardLineNumber = 0;
 			g_ConfigNoteCardReadID = llGetNotecardLine(g_ConfigNoteCardRealName,0);
 		}
+		else
+		{
+			llOwnerSay("Error, configuration notecard not found!");
+		}
 		
 		llSetText("Initializing... Please wait",<1,1,0>,1);
 		UnRunScripts();
@@ -423,7 +427,7 @@ default
 				}
 				else
 				{
-					if (g_NotecardCategory = CAT_NONE)
+					if (g_NotecardCategory == CAT_NONE)
 					{
 						llOwnerSay("line '"+data+"' outside of valid category");
 						g_ConfigNoteCardLineNumber = -1;						
@@ -484,21 +488,21 @@ default
 							}
 							else if (g_NotecardCategory == CAT_REMOVECLUP)
 							{
-								if (keyName = "Item")
+								if (keyName == "Item")
 								{
-									g_RemoveCleanUpItems = AddItem2List(g_RemoveCleanUpItems,data);
+									g_RemoveCleanUpItems = AddItem2List(g_RemoveCleanUpItems,keyValue);
 								}
-								else if (keyName = "Httpdb")
+								else if (keyName == "Httpdb")
 								{
-									g_RemoveCleanUpHttpdb = AddItem2List(g_RemoveCleanUpHttpdb,data);
+									g_RemoveCleanUpHttpdb = AddItem2List(g_RemoveCleanUpHttpdb,keyValue);
 								}
-								else if (keyName = "LocalSetting")
+								else if (keyName == "LocalSetting")
 								{
-									g_RemoveCleanUpLocal = AddItem2List(g_RemoveCleanUpLocal,data);
+									g_RemoveCleanUpLocal = AddItem2List(g_RemoveCleanUpLocal,keyValue);
 								}
-								else if (keyName = "Script")
+								else if (keyName == "Script")
 								{
-									g_RemoveCleanUpScript = data;
+									g_RemoveCleanUpScript = keyValue;
 								}
 								else
 								{
@@ -508,21 +512,21 @@ default
 							}
 							else if (g_NotecardCategory == CAT_UPDATECLUP)
 							{
-								if (keyName = "Item")
+								if (keyName == "Item")
 								{
-									g_UpdateCleanUpItems = AddItem2List(g_UpdateCleanUpItems,data);
+									g_UpdateCleanUpItems = AddItem2List(g_UpdateCleanUpItems,keyValue);
 								}
-								else if (keyName = "Httpdb")
+								else if (keyName == "Httpdb")
 								{
-									g_UpdateCleanUpHttpdb = AddItem2List(g_UpdateCleanUpHttpdb,data);
+									g_UpdateCleanUpHttpdb = AddItem2List(g_UpdateCleanUpHttpdb,keyValue);
 								}
-								else if (keyName = "LocalSetting")
+								else if (keyName == "LocalSetting")
 								{
-									g_UpdateCleanUpLocal = AddItem2List(g_UpdateCleanUpLocal,data);
+									g_UpdateCleanUpLocal = AddItem2List(g_UpdateCleanUpLocal,keyValue);
 								}
-								else if (keyName = "Script")
+								else if (keyName == "Script")
 								{
-									g_UpdateCleanUpScript = data;
+									g_UpdateCleanUpScript = keyValue;
 								}
 								else
 								{
@@ -535,7 +539,7 @@ default
 				}
 			}
 
-			if (g_ConfigNoteCardLineNumber>0)
+			if (g_ConfigNoteCardLineNumber>=0)
 			{
 				g_ConfigNoteCardLineNumber++;
 				g_ConfigNoteCardReadID = llGetNotecardLine(g_ConfigNoteCardRealName,
@@ -624,7 +628,7 @@ state start_update
 		}
 		message += "\nInstaller is ready. Rez your collar\nnext to me, touch it and select Help/Debug->Update.\nOr touch me for help";
 				
-		llSetText(message,<0,0,1>,1);
+		llSetText(message,<0,1,1>,1);
 		
 		// we need to listen to the double check channel as long as we exist
 		llListen(g_DoubleCheckChannel,"",NULL_KEY,"");
@@ -724,7 +728,7 @@ state start_update
 		}
 		else
 		{
-			list notecardDetails = FindItem(g_ConfigNotecard);
+			list notecardDetails = FindItem(g_ConfigHelpCard);
 			
 			if (llList2Integer(notecardDetails,0) == INVENTORY_NONE)
 			{
