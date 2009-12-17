@@ -18,29 +18,77 @@ $module ()
 list FindItem(string pattern)
 {
 	integer type = INVENTORY_NONE;
-	string foundName;
+	string foundName = "";
+	
+	string nameStart;
+	integer nameStartSize;
+	integer numOfItems;
+	integer i;
 	
 	if (llGetSubString(pattern,-1,-1) == "*")
 	{
-		string nameStart = llGetSubString(pattern,0,-2);
-		integer nameStartSize = llStringLength(nameStart)-1;
-		integer numOfItems = llGetInventoryNumber(INVENTORY_ALL);
-		integer i;
-		
-		for(i=0; i<numOfItems; i++)
-		{
-			if (llGetSubString(llGetInventoryName(INVENTORY_ALL,i),0,nameStartSize) == nameStart)
-			{
-				foundName = llGetInventoryName(INVENTORY_ALL,i);
-			}
-		}
+		nameStart = llGetSubString(pattern,0,-2);
 	}
 	else
 	{
-		foundName = pattern;
+		nameStart = pattern;
 	}
+	
+	nameStartSize = llStringLength(nameStart);
+	numOfItems = llGetInventoryNumber(INVENTORY_ALL);
+		
+		
+	for(i=0; i<numOfItems; i++)
+	{
+		if (llToLower(llGetSubString(llGetInventoryName(INVENTORY_ALL,i),0,nameStartSize)) == nameStart)
+		{
+			foundName = llGetInventoryName(INVENTORY_ALL,i);
+		}
+	}
+
 	type = llGetInventoryType(foundName);
 	
 	return [type, foundName];
 }
 
+
+//===============================================================================
+//= parameters :	none
+//=
+//= return :		none
+//=
+//= description :	stops all scripts in inventory
+//=
+//===============================================================================
+
+UnRunScripts()
+{
+    // set all scripts in me to NOT RUNNING
+    integer n;
+    for (n = 0; n < llGetInventoryNumber(INVENTORY_SCRIPT); n++)
+    {
+        string script = llGetInventoryName(INVENTORY_SCRIPT, n);
+        if (script != llGetScriptName())
+        {
+            if (llGetInventoryType(script) == INVENTORY_SCRIPT)
+            {
+                if(llGetScriptState(script))
+                {
+                    llSetScriptState(script, FALSE);
+                } 
+            }
+            else
+            {
+                //somehow we got passed a script we can't find.  Wait a sec and try again
+                if (llGetInventoryType(script) == INVENTORY_SCRIPT)
+                {
+                    llSetScriptState(script, FALSE);        
+                }        
+                else
+                {
+                    llWhisper(DEBUG_CHANNEL, "Could not set " + script + " to not running.");
+                }
+            }
+        }
+    }    
+}

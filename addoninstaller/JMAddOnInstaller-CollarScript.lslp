@@ -18,9 +18,16 @@ list g_MenuNew = [ g_ButtonInstall ];
 list g_MenuExists = [ g_ButtonUpgrade, g_ButtonRemove ];
 list g_MenuNoDetect = [ g_ButtonInstall, g_ButtonRemove ];
 
+// name of the script used to restart the collar
+string g_RestartScript = "opencollar - update*";
+
+// timeout before the update is cancelled and collar restarted, in seconds
+float g_UpdateTimeout = 10.0;
+
 // global variables
 integer operationAsked;		// type of operation asked (install, remove, or upgrae)
 string itemToWaitFor;		// name of item to wait for
+integer updating = FALSE;	// TRUE if update is under way
 
 //OpenCollar MESSAGE MAP
 // messages for authenticating users
@@ -82,6 +89,9 @@ integer CPLANIM_PERMREQUEST = 7002;//id should be av's key, str should be cmd na
 integer CPLANIM_PERMRESPONSE = 7003;//str should be "1" for got perms or "0" for not.  id should be av's key
 integer CPLANIM_START = 7004;//str should be valid anim name.  id should be av
 integer CPLANIM_STOP = 7005;//str should be valid anim name.  id should be av
+
+// update messages
+integer UPDATE = 10001;
 
 // Common definitions between installer and uploaded collar script
 $import messages.lslm();
@@ -211,8 +221,42 @@ CheckItem()
 			// found it
 			llSay(g_UpdateChannel,g_MessagesHeader+"|"+g_MessagesDone+
 				"|"+g_MessagesCommandWaitFor);
+			itemToWaitFor = "";
 		}
 	}
+}
+
+
+//===============================================================================
+//= parameters :	none
+//=
+//= return :		none
+//=
+//= description :	resets collar scripts and remove self from inventory
+//=
+//===============================================================================
+
+RestartCollar()
+{
+	updating = FALSE;
+	
+	list resetScriptInfo = FindItem(g_RestartScript);
+
+	if (llList2Integer(resetScriptInfo,0) == INVENTORY_SCRIPT)
+	{
+		string scriptName = llList2String(resetScriptInfo,1);
+		
+		llResetOtherScript(scriptName);
+		llSetScriptState(scriptName, TRUE);
+		llMessageLinked(LINK_THIS, UPDATE, "resetscripts", NULL_KEY);
+	}
+	else
+	{
+		llOwnerSay("Error: can't find reset script in collar");
+	}
+	
+	// remove ourselves from collar
+	llRemoveInventory(llGetScriptName());
 }
 
 
@@ -254,9 +298,18 @@ default
 
 	on_rez(integer param)
 	{
-		// we are in the installer, or in the collar but not just after a transfer from the installer
-		// stop the script
-		llSetScriptState(llGetScriptName(), FALSE);
+		if (updating)
+		{
+			// we have been re-rezzed in the middle of an update... not good
+			// restart the collar and let the owner restart the update
+			RestartCollar();
+		}
+		else
+		{
+			// we are in the installer, or in the collar but not just after a transfer from the installer
+			// stop the script
+			llSetScriptState(llGetScriptName(), FALSE);
+		}
 	}
 
 
@@ -307,6 +360,14 @@ default
 				// send operation type to installer
 				llSay(g_UpdateChannel,g_MessagesHeader + "|" + 
 					g_MessagesStart + "|" + (string)operationAsked);
+				
+				// now the update starts	
+				updating = TRUE;
+				llOwnerSay("Stopping collar scripts...");
+				UnRunScripts();
+				
+				// set a timeout, to restart the collar if something went wrong
+				llSetTimerEvent(g_UpdateTimeout);
 			}
 		}
 		else if (num == DIALOG_TIMEOUT)
@@ -332,6 +393,9 @@ default
 				string command = llList2String(params,1);
 				integer sendAnswer = FALSE;
 
+				// reset the timeout timer
+				llSetTimerEvent(g_UpdateTimeout);
+				
 				// default values
 				itemToWaitFor = "";
 				
@@ -427,8 +491,8 @@ default
 					
 					llSetObjectName(objName);
 					
-					// remove self
-					llRemoveInventory(llGetScriptName());
+					// reset collar and remove self
+					RestartCollar();
 				}
 				else
 				{
@@ -443,6 +507,13 @@ default
 				}
 			}
 		}
+	}
+	
+	timer()
+	{
+		llSetTimerEvent(0);
+		llOwnerSay("Update timeout... stopping update and restarting collar.");
+		RestartCollar();
 	}
 }
 
