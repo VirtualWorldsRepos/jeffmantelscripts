@@ -6,8 +6,8 @@
 //Licensed under the GPLv2, with the additional requirement that these scripts remain "full perms" in Second Life.	See "OpenCollar License" for details.
 
 // internal setup
-string g_ConfigNotecard = "InstallerConfig*";
-string g_InstallerScript = "JMAddOnInstaller - collar script*";
+string g_ConfigNotecard = "installerconfig*";
+string g_InstallerScript = "jmaddoninstaller - collar script*";
 
 // configuration read from notecard
 string g_ConfigName;
@@ -93,47 +93,6 @@ string AddItem2List(string origlist, string item)
 	}
 }
 
-
-//===============================================================================
-//= parameters :	none
-//=
-//= return :		none
-//=
-//= description :	stops all scripts in inventory
-//=
-//===============================================================================
-
-UnRunScripts()
-{
-    // set all scripts in me to NOT RUNNING
-    integer n;
-    for (n = 0; n < llGetInventoryNumber(INVENTORY_SCRIPT); n++)
-    {
-        string script = llGetInventoryName(INVENTORY_SCRIPT, n);
-        if (script != llGetScriptName())
-        {
-            if (llGetInventoryType(script) == INVENTORY_SCRIPT)
-            {
-                if(llGetScriptState(script))
-                {
-                    llSetScriptState(script, FALSE);
-                } 
-            }
-            else
-            {
-                //somehow we got passed a script we can't find.  Wait a sec and try again
-                if (llGetInventoryType(script) == INVENTORY_SCRIPT)
-                {
-                    llSetScriptState(script, FALSE);        
-                }        
-                else
-                {
-                    llWhisper(DEBUG_CHANNEL, "Could not set " + script + " to not running.");
-                }
-            }
-        }
-    }    
-}
 
 //===============================================================================
 //= parameters :	string	name			Name of the item to send
@@ -390,7 +349,7 @@ default
 			}
 			else
 			{
-				data = llStringTrim(data,STRING_TRIM);
+				data = llToLower(llStringTrim(data,STRING_TRIM));
 				
 				if ((data == "") || (llGetSubString(data,0,0) == "#"))
 				{
@@ -399,23 +358,23 @@ default
 				else if (llGetSubString(data,0,0) == "[")
 				{
 					// new category
-					if (data == "[Main]")
+					if (data == "[main]")
 					{
 						g_NotecardCategory = CAT_MAIN;
 					}
-					else if (data == "[Detection]")
+					else if (data == "[detection]")
 					{
 						g_NotecardCategory = CAT_DETECTION;
 					}
-					else if (data == "[Install]")
+					else if (data == "[install]")
 					{
 						g_NotecardCategory = CAT_INSTALL;
 					}
-					else if (data == "[RemoveCleanUp]")
+					else if (data == "[removecleanup]")
 					{
 						g_NotecardCategory = CAT_REMOVECLUP;
 					}
-					else if (data == "[UpgradeCleanUp]")
+					else if (data == "[upgradecleanup]")
 					{
 						g_NotecardCategory = CAT_UPDATECLUP;
 					}
@@ -455,23 +414,23 @@ default
 							
 							if (g_NotecardCategory == CAT_MAIN)
 							{
-								if (keyName == "Name")
+								if (keyName == "name")
 								{
 									g_ConfigName = keyValue;
 								}
-								else if (keyName == "Author")
+								else if (keyName == "author")
 								{
 									g_ConfigAuthor = keyValue;
 								}
-								else if (keyName == "Version")
+								else if (keyName == "version")
 								{
 									g_ConfigVersion = keyValue;
 								}
-								else if (keyName == "Help")
+								else if (keyName == "help")
 								{
 									g_ConfigHelpCard = keyValue;
 								}
-								else if (keyName == "MinCollarVersion")
+								else if (keyName == "mincollarversion")
 								{
 									float newVersion = (float)keyValue;
 									
@@ -488,19 +447,19 @@ default
 							}
 							else if (g_NotecardCategory == CAT_REMOVECLUP)
 							{
-								if (keyName == "Item")
+								if (keyName == "item")
 								{
 									g_RemoveCleanUpItems = AddItem2List(g_RemoveCleanUpItems,keyValue);
 								}
-								else if (keyName == "Httpdb")
+								else if (keyName == "httpdb")
 								{
 									g_RemoveCleanUpHttpdb = AddItem2List(g_RemoveCleanUpHttpdb,keyValue);
 								}
-								else if (keyName == "LocalSetting")
+								else if (keyName == "localsetting")
 								{
 									g_RemoveCleanUpLocal = AddItem2List(g_RemoveCleanUpLocal,keyValue);
 								}
-								else if (keyName == "Script")
+								else if (keyName == "script")
 								{
 									g_RemoveCleanUpScript = keyValue;
 								}
@@ -512,19 +471,19 @@ default
 							}
 							else if (g_NotecardCategory == CAT_UPDATECLUP)
 							{
-								if (keyName == "Item")
+								if (keyName == "item")
 								{
 									g_UpdateCleanUpItems = AddItem2List(g_UpdateCleanUpItems,keyValue);
 								}
-								else if (keyName == "Httpdb")
+								else if (keyName == "httpdb")
 								{
 									g_UpdateCleanUpHttpdb = AddItem2List(g_UpdateCleanUpHttpdb,keyValue);
 								}
-								else if (keyName == "LocalSetting")
+								else if (keyName == "localsetting")
 								{
 									g_UpdateCleanUpLocal = AddItem2List(g_UpdateCleanUpLocal,keyValue);
 								}
-								else if (keyName == "Script")
+								else if (keyName == "script")
 								{
 									g_UpdateCleanUpScript = keyValue;
 								}
