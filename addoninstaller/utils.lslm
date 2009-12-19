@@ -34,7 +34,7 @@ list FindItem(string pattern)
 		nameStart = pattern;
 	}
 	
-	nameStartSize = llStringLength(nameStart);
+	nameStartSize = llStringLength(nameStart)-1;
 	numOfItems = llGetInventoryNumber(INVENTORY_ALL);
 		
 		

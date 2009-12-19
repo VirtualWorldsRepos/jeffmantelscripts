@@ -22,12 +22,13 @@ list g_MenuNoDetect = [ g_ButtonInstall, g_ButtonRemove ];
 string g_RestartScript = "opencollar - update*";
 
 // timeout before the update is cancelled and collar restarted, in seconds
-float g_UpdateTimeout = 10.0;
+float g_UpdateTimeout = 20.0;
 
 // global variables
-integer operationAsked;		// type of operation asked (install, remove, or upgrae)
-string itemToWaitFor;		// name of item to wait for
-integer updating = FALSE;	// TRUE if update is under way
+integer operationAsked;				// type of operation asked (install, remove, or upgrae)
+string itemToWaitFor;				// name of item to wait for
+integer updating = FALSE;			// TRUE if update is under way
+integer gAnswerAfterReset = FALSE;	// TRUE is an answer should be sent after the collar has been reset
 
 //OpenCollar MESSAGE MAP
 // messages for authenticating users
@@ -228,7 +229,8 @@ CheckItem()
 
 
 //===============================================================================
-//= parameters :	none
+//= parameters :	answer    integer    if TRUE, will send an answer on update channel when restart is complete
+//=                                      if FALSE, will self-delete when restart is complete
 //=
 //= return :		none
 //=
@@ -236,9 +238,10 @@ CheckItem()
 //=
 //===============================================================================
 
-RestartCollar()
+RestartCollar(integer answer)
 {
 	updating = FALSE;
+	gAnswerAfterReset = answer;
 	
 	list resetScriptInfo = FindItem(g_RestartScript);
 
@@ -246,8 +249,11 @@ RestartCollar()
 	{
 		string scriptName = llList2String(resetScriptInfo,1);
 		
-		llResetOtherScript(scriptName);
 		llSetScriptState(scriptName, TRUE);
+		llSleep(2.0);
+		llResetOtherScript(scriptName);
+
+		llSleep(2.0);
 		llMessageLinked(LINK_THIS, UPDATE, "resetscripts", NULL_KEY);
 	}
 	else
@@ -255,8 +261,7 @@ RestartCollar()
 		llOwnerSay("Error: can't find reset script in collar");
 	}
 	
-	// remove ourselves from collar
-	llRemoveInventory(llGetScriptName());
+	// we don't remove ourselves from collar yet, we'll do it after the "reset done" message from the ollar's updater script
 }
 
 
@@ -302,7 +307,7 @@ default
 		{
 			// we have been re-rezzed in the middle of an update... not good
 			// restart the collar and let the owner restart the update
-			RestartCollar();
+			RestartCollar(FALSE);
 		}
 		else
 		{
@@ -379,6 +384,23 @@ default
 				llOwnerSay("Menu timeout. Please start the installation again by selecting Held/Debug > Update in your collar");
 			}
 		}
+		else if (num == UPDATE)
+        {
+            if (str == "Reset Done")
+            {
+            	// reset is complete
+            	if (gAnswerAfterReset)
+            	{
+            		// send a reply to the updater
+            		llSay(g_UpdateChannel,g_MessagesHeader + "|" + g_MessagesDone + "|" + g_MessagesCommandStartScripts);
+            	}
+            	else
+            	{
+            		// it was triggered by the watchdog... just delete ourselves
+					llRemoveInventory(llGetScriptName());
+            	}
+            }    
+        }
 	}
 	
 	// listen for commands from the installer
@@ -447,7 +469,7 @@ default
 				}
 				else if (command == g_MessagesCommandWaitFor)
 				{
-					itemToWaitFor = llList2String(params,2);
+					itemToWaitFor = llToLower(llList2String(params,2));
 					CheckItem();
 				}
 				else if (command == g_MessagesCommandStartScripts)
@@ -455,8 +477,7 @@ default
 					// reset opencollar scripts and start add-on scripts
 					// this can be necessary in case the add-on added anything in the
 					// collar that must be picked up by the OC scripts
-					llMessageLinked(LINK_THIS,COMMAND_OWNER,"resetscripts",NULL_KEY);
-					sendAnswer = TRUE;
+					RestartCollar(TRUE);
 				}
 				else if (command == g_MessagesCommandRemoveHttpdb)
 				{
@@ -491,8 +512,8 @@ default
 					
 					llSetObjectName(objName);
 					
-					// reset collar and remove self
-					RestartCollar();
+					// remove self
+					llRemoveInventory(llGetScriptName());
 				}
 				else
 				{
@@ -509,11 +530,21 @@ default
 		}
 	}
 	
+	// if inventory changed, check if it's the item we are waiting for
+	changed(integer change)
+	{
+		if (change & CHANGED_INVENTORY)
+		{
+			CheckItem();
+		}
+	}
+	
+	// Watchdog timer
 	timer()
 	{
 		llSetTimerEvent(0);
 		llOwnerSay("Update timeout... stopping update and restarting collar.");
-		RestartCollar();
+		RestartCollar(FALSE);
 	}
 }
 

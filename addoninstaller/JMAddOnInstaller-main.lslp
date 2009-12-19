@@ -255,7 +255,10 @@ NextStep()
 	{
 		if (g_OperationType == OPERATION_REMOVE)
 		{
-			g_CurrentStep = STEP_END;
+			g_CurrentStep = STEP_STARTSCRIPTS;
+			llSetText("Starting scripts",<1,1,0>,1);
+			SendCommand(g_MessagesCommandStartScripts,"");
+			return;
 		}
 		else
 		{
@@ -282,6 +285,8 @@ NextStep()
 			{
 				llSetText("Installing " + itemName,<1,1,0>,1);
 				SendCommand(g_MessagesCommandWaitFor,itemName);
+				
+				llSleep(1.0);
 			}
 			
 			return;
@@ -297,6 +302,7 @@ NextStep()
 	{
 		llSetText("Operation finished",<0,1,0>,1);
 		llOwnerSay("Operation finished. You can pick up the collar");
+		SendCommand(g_MessagesEnd,"");
 	}
 }
 
