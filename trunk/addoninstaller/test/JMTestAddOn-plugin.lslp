@@ -338,7 +338,7 @@ default
 						// and restart the menu if wanted/needed
 						DoMenu(av);
 					}
-					else if (message == "Write settings")
+					else if (message == "Write setting")
 					{
 						llMessageLinked(LINK_THIS,HTTPDB_SAVE,dbToken+"=1",NULL_KEY);
 						dbEntryIsHere = TRUE;
