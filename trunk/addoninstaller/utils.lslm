@@ -19,33 +19,47 @@ list FindItem(string pattern)
 {
 	integer type = INVENTORY_NONE;
 	string foundName = "";
+	string lowerPattern = llToLower(pattern);
 	
-	string nameStart;
-	integer nameStartSize;
 	integer numOfItems;
 	integer i;
 	
+	string inventoryName;
+
+	numOfItems = llGetInventoryNumber(INVENTORY_ALL);
+		
 	if (llGetSubString(pattern,-1,-1) == "*")
 	{
-		nameStart = llGetSubString(pattern,0,-2);
+		// looking for a name that starts with the pattern
+		string nameStart;
+		integer nameStartSize;
+		
+		nameStart = llGetSubString(lowerPattern,0,-2);
+		nameStartSize = llStringLength(nameStart)-1;
+		
+		for(i=0; i<numOfItems; i++)
+		{
+			inventoryName = llGetInventoryName(INVENTORY_ALL,i);
+			if (llToLower(llGetSubString(inventoryName,0,nameStartSize)) == nameStart)
+			{
+				foundName = inventoryName;
+			}
+		}
 	}
 	else
 	{
-		nameStart = pattern;
-	}
-	
-	nameStartSize = llStringLength(nameStart)-1;
-	numOfItems = llGetInventoryNumber(INVENTORY_ALL);
-		
-		
-	for(i=0; i<numOfItems; i++)
-	{
-		if (llToLower(llGetSubString(llGetInventoryName(INVENTORY_ALL,i),0,nameStartSize)) == nameStart)
+		// looking for exact match
+		for(i=0; i<numOfItems; i++)
 		{
-			foundName = llGetInventoryName(INVENTORY_ALL,i);
+			inventoryName = llGetInventoryName(INVENTORY_ALL,i);
+			if (llToLower(inventoryName) == lowerPattern)
+			{
+				foundName = inventoryName;
+			}
 		}
 	}
-
+	
+	// report found type
 	type = llGetInventoryType(foundName);
 	
 	return [type, foundName];

@@ -355,7 +355,7 @@ default
 			}
 			else
 			{
-				data = llToLower(llStringTrim(data,STRING_TRIM));
+				data = llStringTrim(data,STRING_TRIM);
 				
 				if ((data == "") || (llGetSubString(data,0,0) == "#"))
 				{
@@ -364,6 +364,8 @@ default
 				else if (llGetSubString(data,0,0) == "[")
 				{
 					// new category
+					data = llToLower(data);
+					
 					if (data == "[main]")
 					{
 						g_NotecardCategory = CAT_MAIN;
@@ -415,7 +417,7 @@ default
 						}
 						else
 						{
-							string keyName = llList2String(parsedData,0);
+							string keyName = llToLower(llList2String(parsedData,0));
 							string keyValue = llList2String(parsedData,1);
 							
 							if (g_NotecardCategory == CAT_MAIN)
