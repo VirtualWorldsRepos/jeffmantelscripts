@@ -1,0 +1,1 @@
+This [OpenCollar](http://code.google.com/p/opencollar/) add-on is a game using cards that can be used by switches to exchange roles. Please see my [web site](http://sites.google.com/site/jeffmantelsdesigns/opencollar-add-ons/card-game) for more details.
